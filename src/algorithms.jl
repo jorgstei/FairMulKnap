@@ -68,24 +68,38 @@ function solve_binary_knapsack(bin::Knapsack, items::Vector{Item})
             return get_binary_knapsack_solution(i - 1, j)
         end
     end
-    println("optimal", optimal_solution_index)
+    #println("optimal", optimal_solution_index)
     solution = get_binary_knapsack_solution(optimal_solution_index[1], optimal_solution_index[2])
     println("Solution: ", solution)
     =#
+
     return profits[length(items_copy), bin.capacity+1]
 end
 
 # solve 0-1 knapsack problem on the aggregate knapsack and return the value
+# Works for items with a single valuation
 function compute_upper_bound(bins::Vector{Knapsack}, items::Vector{Item})
     aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
     return solve_binary_knapsack(aggregate_knapsack, items)
 end
 
 # Return the upper bound considering individual valuations
-function compute_upper_bound_individual_vals(bins::Vector{Knapsack}, items::Vector{Item})
+# Compute aggregate knapsack, and assign each item it's maximum valuation before solving binary knapsack
+function compute_max_upper_bound_individual_vals(bins::Vector{Knapsack}, items::Vector{Item})
+    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
+    adjusted_items = Array{Item}(undef, 0)
     for item in items
-
+        itemcpy = Item(item.id, item.cost, fill(maximum(item.valuations), length(item.valuations)))
+        push!(adjusted_items, itemcpy)
     end
+    return solve_binary_knapsack(aggregate_knapsack, adjusted_items)
+end
+
+
+# Return the upper bound considering individual valuations
+# Compute aggregate knapsack, and assign each item it's maximum valuation before solving binary knapsack
+function compute_optimized_upper_bound_individual_vals(bins::Vector{Knapsack}, items::Vector{Item})
+    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
 end
 
 
@@ -151,7 +165,7 @@ function generate_undominated_bin_assignments(bin::Knapsack, items::Vector{Item}
     #feasible([], [], items, max[2] + 1, bin.capacity)
 
 end
-
+# Make new version with up to k combinations by sorting them and finding the combination with most items
 function generate_all_feasible_maximal_bin_assignments(bin::Knapsack, items::Vector{Item})
     all_combinations = collect(combinations(items))
     maximal_assignments = []
@@ -212,7 +226,7 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
         #println("Items: ", items, "\nItems to remove: ", assignment, "\nRemaining items: ", items_copy)
         bins_copy = deepcopy(bins)
         bins_copy \ bin
-        subproblem = search_MKP(bins_copy, items_copy, sum_profit + sum((item) -> item.valuations[1], assignment))
+        subproblem = search_MKP(bins_copy, items_copy, sum_profit + sum((item) -> item.valuations[bin_index], assignment))
         if (subproblem[1] > best_assignment[1])
             best_assignment = (subproblem[1], subproblem[2] + deepcopy(bins[bin_index]))
             #println("Set best assignment to: ", best_assignment)

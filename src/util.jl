@@ -11,6 +11,7 @@ function generate_items(n_items::Int, min_cost::Int, max_cost::Int, n_agents::In
     for i in range(1, n_items)
         push!(items, Item(i, rand(min_cost:max_cost), rand(min_val:max_val, n_agents)))
     end
+    println("generated", items)
     return items
 end
 
@@ -94,13 +95,13 @@ function print_solution(solution::Tuple)
     profit = solution[1]
     bins = solution[2]
     println("\n\nObtained solution with profit: ", profit)
-    for bin in bins
+    for (idx, bin) in enumerate(bins)
         println("\nBin ", bin.id, "     ", bin)
         for item in bin.items
             println(item)
         end
         println("Total capacity filled: ", sum(item -> item.cost, bin.items; init=0))
-        println("Total profit: ", sum(item -> item.valuations[1], bin.items; init=0))
+        println("Total profit: ", sum(item -> item.valuations[idx], bin.items; init=0))
     end
 end
 

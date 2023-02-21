@@ -20,6 +20,13 @@ test_knaps = [Knapsack(1, [], 100, 0), Knapsack(2, [], 100, 0), Knapsack(3, [], 
 #show(stdout, MIME("text/plain"), bin_completion_benchmark)
 #bin_completion_benchmark_nosort = @benchmark solve_multiple_knapsack_problem(test_knaps, test_items, false, false, true)
 #show(stdout, MIME("text/plain"), bin_completion_benchmark_nosort)
+#=
+# Individual values 
+=#
+indiv_knaps = [Knapsack(1, [], 50, 0), Knapsack(2, [], 30, 0)]
+indiv_items = [Item(1, 10, [1, 5]), Item(2, 20, [2, 14]), Item(3, 40, [4, 8]), Item(4, 9, [5, 1]), Item(5, 9, [6, 2])]
+solve_multiple_knapsack_problem(indiv_knaps, indiv_items, true, true, true)
+
 
 
 mutable struct BenchmarkResults
@@ -53,8 +60,8 @@ end
 
 
 item_list_step = 4
-n_items_list = collect(range(4, 8, step=item_list_step))
-n_agents_tuple = (1, 3)
+n_items_list = collect(range(4, 12, step=item_list_step))
+n_agents_tuple = (4, 8)
 
 fukunaga_res = BenchmarkResults("Bin completion", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
 fukunaga_without_res = BenchmarkResults("Bin completion without sorting & preprocessing", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
@@ -67,6 +74,23 @@ for n_agents in n_agents_tuple[1]:n_agents_tuple[2]
 
         bench_items = generate_items(n_items, 1, 30, n_agents, 1, 20)
         bench_bins = generate_knapsacks(n_agents, 30, 120)
+        #=
+        println("\nBenchmarking with items: \n", bench_items)
+        println("\nBenchmarking with bins: \n", bench_bins)
+        println(
+            "\nRes1: ", compute_max_upper_bound_individual_vals(bench_bins, bench_items),
+            "\nRes2: ", compute_upper_bound(bench_bins, bench_items),
+        )
+
+        for (idx, bin) in enumerate(bench_bins)
+            adjusted_items = Array{Item}(undef, 0)
+            for item in bench_items
+                itemcpy = Item(item.id, item.cost, fill(item.valuations[idx], length(item.valuations)))
+                push!(adjusted_items, itemcpy)
+            end
+            println("Bin ", bin.id, " with c=", bin.capacity, ": ", solve_binary_knapsack(bin, adjusted_items))
+        end
+        =#
 
         values = []
         weights = []

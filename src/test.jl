@@ -25,6 +25,9 @@ test_knaps = [Knapsack(1, [], 100, 0), Knapsack(2, [], 100, 0), Knapsack(3, [], 
 =#
 indiv_knaps = [Knapsack(1, [], 50, 0), Knapsack(2, [], 30, 0)]
 indiv_items = [Item(1, 10, [1, 5]), Item(2, 20, [2, 14]), Item(3, 40, [4, 8]), Item(4, 9, [5, 1]), Item(5, 9, [6, 2])]
+#test_bench = @benchmark generate_all_feasible_maximal_bin_assignments(copy($test_knaps[1]), copy($test_items))
+#new_bench = @benchmark generate_all_feasible_maximal_bin_assignments_two(copy($test_knaps[1]), copy($test_items))
+#println("Res: ", test_bench, " vs ", new_bench)
 solve_multiple_knapsack_problem(indiv_knaps, indiv_items, true, true, true)
 
 

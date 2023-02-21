@@ -191,6 +191,50 @@ function generate_all_feasible_maximal_bin_assignments(bin::Knapsack, items::Vec
     #println(maximal_assignments)
     return maximal_assignments
 end
+function generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs(bin::Knapsack, items::Vector{Item})
+    # Sort items by increasing cost
+    sorted_items = sort(items, by=item -> item.cost)
+    # Greedily sum items until we hit capacity, the number of items is the max we need to calculate combinations for.
+    sum_of_cost = 0
+    n_items = 0
+    for item in sorted_items
+        if (sum_of_cost + item.cost > bin.capacity)
+            break
+        else
+            sum_of_cost += item.cost
+            n_items += 1
+        end
+    end
+    all_combinations = []
+    for i in range(1, n_items)
+        combinations_of_k_items = collect(combinations(items, i))
+        for comb in combinations_of_k_items
+            push!(all_combinations, comb)
+        end
+    end
+    maximal_assignments = []
+    for comb in all_combinations
+        unallocated_items = filter(item -> !issubset([item], comb), items)
+        current_weight = sum(item -> item.cost, comb)
+        # If the assignment is infeasible
+        if (current_weight > bin.capacity)
+            continue
+        end
+        # If the assignment is maximal (contains as many items as possible)
+        assignment_is_maximal = true
+        for item in unallocated_items
+            if (current_weight + item.cost <= bin.capacity)
+                assignment_is_maximal = false
+                break
+            end
+        end
+        if (assignment_is_maximal)
+            push!(maximal_assignments, comb)
+        end
+    end
+    #println(maximal_assignments)
+    return maximal_assignments
+end
 
 global best_profit = 1
 
@@ -204,7 +248,7 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
         end
         #println("Didn't ", sum_profit, " vs ", best_profit)
     else
-        upper_bound = compute_upper_bound(bins, items)
+        upper_bound = compute_max_upper_bound_individual_vals(bins, items)
     end
 
     if (sum_profit + upper_bound <= best_profit)
@@ -214,7 +258,7 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
     # upper bound validation - TODO
     (bin, bin_index) = get_bin_with_least_remaining_capacity(bins)
     #println("Selected ", bin, bin_index, " bound ", upper_bound)
-    assignments = sort(generate_all_feasible_maximal_bin_assignments(bin, items), rev=true)
+    assignments = sort(generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs(bin, items), rev=true)
     best_assignment = (-1, [])
     #println("Assignments: ", assignments)
     for assignment in assignments

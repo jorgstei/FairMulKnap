@@ -1,7 +1,7 @@
-function convert_from_weight_and_value_array_to_item_list(weights::Vector, values::Vector)::Vector{Item}
+function convert_from_weight_and_value_array_to_item_list(weights::Vector, values::Vector, n_agents::Int)::Vector{Item}
     list::Vector{Item} = []
     for i in 1:length(weights)
-        push!(list, Item(i, weights[i], [values[i]]))
+        push!(list, Item(i, weights[i], fill(values[i], n_agents)))
     end
     return list
 end

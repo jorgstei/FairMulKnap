@@ -1,3 +1,4 @@
+# For immutable items er equality field-basert, trenger ikke overwrite
 struct Item
     id::Int
     cost::Int
@@ -37,6 +38,12 @@ end
 
 Base.copy(item::Item) = Item(item.id, item.cost, item.valuations)
 Base.:\(items::Vector{Item}, item::Item) = remove_item_from_vector(items, item)
+import Base: ==
+==(x::Item, y::Item) = x.id == y.id
+#setdiff(x, y) instead of 
+#vcat istedet of + maybe?
+# maybe definer egen container-type i stedet for å overwrite metoder for 
+
 Base.:\(items::Vector{Item}, items_to_remove::Vector{Item}) = foreach(i -> remove_item_from_vector(items, i), items_to_remove)
 Base.isless(items_a::Vector{Item}, items_b::Vector{Item}) = is_smaller_cardinally_with_value_tie_break(items_a, items_b)
 

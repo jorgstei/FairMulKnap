@@ -2,10 +2,8 @@
 #=
 thief_items = [Item(1, 2, [3]), Item(2, 3, [4]), Item(3, 4, [5]), Item(4, 5, [6])]
 thief_knap = [Knapsack(1, [], 5, 0), Knapsack(2, [], 4, 0)]
-simple_example_benchmark = @benchmark solve_multiple_knapsack_problem(thief_knap, thief_items, true, false, false)
+simple_example_benchmark = @benchmark solve_multiple_knapsack_problem(thief_knap, thief_items, false, false)
 show(stdout, MIME("text/plain"), simple_example_benchmark)
-simple_example_benchmark_nosort = @benchmark solve_multiple_knapsack_problem(thief_knap, thief_items, false, false, false)
-show(stdout, MIME("text/plain"), simple_example_benchmark_nosort)
 =#
 #=
 testing_items = [Item(1, 4, [2]), Item(2, 7, [5]), Item(3, 2, [6]), Item(4, 4, [7]), Item(5, 3, [1]), Item(6, 2, [3])]
@@ -14,12 +12,14 @@ testing_knap = [Knapsack(1, [], 5, 0), Knapsack(2, [], 4, 0), Knapsack(3, [], 7,
 # Example from google: https://developers.google.com/optimization/bin/multiple_knapsack
 item_weights = [48, 30, 42, 36, 36, 48, 42, 42, 36, 24, 30, 30, 42, 36, 36]
 item_vals = [10, 30, 25, 50, 35, 30, 15, 40, 30, 35, 45, 10, 20, 30, 25]
-test_items = convert_from_weight_and_value_array_to_item_list(item_weights, item_vals)
+test_items = convert_from_weight_and_value_array_to_item_list(item_weights, item_vals, 5)
 test_knaps = [Knapsack(1, [], 100, 0), Knapsack(2, [], 100, 0), Knapsack(3, [], 100, 0), Knapsack(4, [], 100, 0), Knapsack(5, [], 100, 0)]
-#bin_completion_benchmark = @benchmark solve_multiple_knapsack_problem(test_knaps, test_items, true, false, false)
+#bin_completion_benchmark = @benchmark solve_multiple_knapsack_problem(test_knaps, test_items, false, false)
 #show(stdout, MIME("text/plain"), bin_completion_benchmark)
-#bin_completion_benchmark_nosort = @benchmark solve_multiple_knapsack_problem(test_knaps, test_items, false, false, true)
+#bin_completion_benchmark_nosort = @benchmark solve_multiple_knapsack_problem(test_knaps, test_items,  false, true)
 #show(stdout, MIME("text/plain"), bin_completion_benchmark_nosort)
+#solve_multiple_knapsack_problem(test_knaps, test_items, true, true)
+
 #=
 # Individual values 
 =#
@@ -28,7 +28,7 @@ indiv_items = [Item(1, 10, [1, 5]), Item(2, 20, [2, 14]), Item(3, 40, [4, 8]), I
 #test_bench = @benchmark generate_all_feasible_maximal_bin_assignments(copy($test_knaps[1]), copy($test_items))
 #new_bench = @benchmark generate_all_feasible_maximal_bin_assignments_two(copy($test_knaps[1]), copy($test_items))
 #println("Res: ", test_bench, " vs ", new_bench)
-solve_multiple_knapsack_problem(indiv_knaps, indiv_items, true, true, true)
+#solve_multiple_knapsack_problem(indiv_knaps, indiv_items, true, true, true)
 
 
 
@@ -116,11 +116,11 @@ for n_agents in n_agents_tuple[1]:n_agents_tuple[2]
 
         for i in 1:3
             #println("\nBin completion:")
-            fukunaga_bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), true, true, false)
+            fukunaga_bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), true, false)
             #show(stdout, MIME("text/plain"), fukunaga_bench)
 
-            #println("\n\nBin completion without sorting and preprocessing")
-            fukunaga_bench_without = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), false, false, false)
+            #println("\n\nBin completion without and preprocessing")
+            fukunaga_bench_without = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), false, false)
             #show(stdout, MIME("text/plain"), fukunaga_bench_without)
 
             #println("\n\nCBC")

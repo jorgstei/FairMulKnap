@@ -102,6 +102,51 @@ function compute_optimized_upper_bound_individual_vals(bins::Vector{Knapsack}, i
     aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
 end
 
+# The program should keep the items sorted throughout so long as the items were sorted by profit/weight initially.
+# This happens automatically in solve_multiple_knapsack_problem
+function pisinger_r2_reduction(bins::Vector{Knapsack}, sorted_items::Vector{Item}, lower_bound)
+    # SMKP
+    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
+    # Find break item
+    break_item = Nothing
+    break_item_idx = -1
+    total_sum = 0
+    for (idx, item) in enumerate(sorted_items)
+        total_sum += item.cost
+        if total_sum > aggregate_knapsack.capacity
+            break_item = item
+            break_item_idx = idx
+            break
+        end
+    end
+
+    # If all items fit in the combined knapsack none can be removed
+    if break_item_idx == -1
+        return Item[]
+    end
+
+    sum_profits = 0
+    sum_weights = 0
+    for item in sorted_items[1:break_item_idx]
+        sum_profits += item.valuations[1]
+        sum_weights += item.cost
+    end
+
+    items_to_remove = Item[]
+
+    for item in sorted_items[break_item_idx:length(sorted_items)]
+        upper_bound = sum_profits + item.valuations[1] +
+                      floor(
+                          (aggregate_knapsack.capacity - sum_weights - item.cost) *
+                          break_item.valuations[1] / break_item.cost
+                      )
+        if upper_bound <= lower_bound
+            push!(items_to_remove, item)
+        end
+    end
+    return items_to_remove
+end
+
 
 # Tests whether the assignment is dominated by making sure x-s > r-t
 # Where x is 
@@ -248,6 +293,14 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
         end
         #println("Didn't ", sum_profit, " vs ", best_profit)
     else
+        #=
+        reduced_items = pisinger_r2_reduction(bins, items, best_profit)
+        if length(reduced_items) > 0
+            #println("Current items:\n", items)
+            #println("Reduced items:\n", reduced_items, "\n from instance with bins:\n", bins)
+            return search_MKP(bins, setdiff(items, reduced_items), sum_profit)
+        end
+        =#
         upper_bound = compute_max_upper_bound_individual_vals(bins, items)
     end
 
@@ -282,10 +335,9 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
     return best_assignment
 end
 
-function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{Item}, sort_items_by_efficiency::Bool, preprocess_items_and_bins::Bool, print_solution_after::Bool)
-    if (sort_items_by_efficiency)
-        items = sort(items, by=item -> item.valuations[1] / item.cost, rev=true)
-    end
+function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{Item}, preprocess_items_and_bins::Bool, print_solution_after::Bool)
+    items = sort(items, by=item -> item.valuations[1] / item.cost, rev=true)
+
     if (preprocess_items_and_bins)
         remove_infeasible_knapsacks!(bins, items)
         remove_infeasible_items!(bins, items)

@@ -158,20 +158,8 @@ function is_assignment_dominated(included, excluded, residual_capacity)
 
 end
 
-# Path symmetry
-function is_assignment_symmetric()
-    # If a sibling of an ancestor of current node has already been expanded, that sibling is a nogood with respect to current node.
-    # Since DFS, a nogood is a node who's descendants have been exhaustively searched already. 
-    # The union of these nogoods is a list fo the entire part of the search tree we've searched.
-    # Can prune based if symmetric 
-
-end
-
 # R. Korf 2003 - An improved Algorithm for Optimal Bin packing
-# Used to generate undominated sets
-# Q: What does an undominated set mean in the context of multiple knapsack as opposed to bin packing?
-# Current understanding: Still means the same thing, we deal with the value/profit later.
-# But maybe we could include some notion of dominance based on profit as well?
+# Used to generate undominated sets for bin packing, not MKP
 function feasible(included, excluded, remaining::Vector{Item}, lower_bound, upper_bound)
     if (length(remaining) == 0 || upper_bound == 0)
         if (is_assignment_dominated(included, excluded, residual_capacity))
@@ -205,11 +193,55 @@ function feasible(included, excluded, remaining::Vector{Item}, lower_bound, uppe
     end
 end
 
+# Used to generate feasible and undominated assignments
+# according to MKP dominance criterion Fukunaga & Korf 2007
+# Should work for 
 function generate_undominated_bin_assignments(bin::Knapsack, items::Vector{Item})
-    #max = find_max_item(items)
-    #feasible([], [], items, max[2] + 1, bin.capacity)
+    undominated_assignments::Vector{Vector{Item}} = []
+
+    function is_undominated(path::Vector{Item}, excluded_items::Vector{Item})
+        assignment_cost = sum((item) -> item.cost, path)
+        subsets = collect(combinations(path))
+        for item in excluded_items
+            for subset in subsets
+                subset_cost = sum((item) -> item.cost, subset)
+                subset_profit = sum((item) -> item.valuations[bin.id], subset)
+                # If feasible to swap subset with excluded item
+                if (assignment_cost - subset_cost + item.cost <= bin.capacity && item.cost >= subset_cost)
+                    # If profitable to swap subset with excluded item
+                    if (item.valuations[bin.id] >= subset_profit)
+                        # Then the assignment is dominated
+                        return false
+                    end
+                end
+            end
+        end
+        return true
+    end
+
+    function traverse_binary_tree(remaining_capacity, path::Vector{Item}, remaining_items::Vector{Item}, excluded_items::Vector{Item})
+        if length(remaining_items) == 0
+            if length(path) > 0 && is_undominated(path, excluded_items)
+                push!(undominated_assignments, path)
+            end
+            return
+        end
+        # Don't include item
+        traverse_binary_tree(remaining_capacity, path, remaining_items[2:end], vcat(remaining_items[1], excluded_items))
+        # If feasible to include the item, do that
+        if remaining_capacity - remaining_items[1].cost >= 0
+            traverse_binary_tree(remaining_capacity - remaining_items[1].cost, vcat(path, remaining_items[1]), remaining_items[2:end], excluded_items)
+        end
+    end
+
+    traverse_binary_tree(bin.capacity, Item[], items, Item[])
+    return undominated_assignments
 
 end
+
+#
+
+
 # Make new version with up to k combinations by sorting them and finding the combination with most items
 function generate_all_feasible_maximal_bin_assignments(bin::Knapsack, items::Vector{Item})
     all_combinations = collect(combinations(items))
@@ -236,6 +268,11 @@ function generate_all_feasible_maximal_bin_assignments(bin::Knapsack, items::Vec
     #println(maximal_assignments)
     return maximal_assignments
 end
+
+# Generates all feasible, maximal bin assignments
+# Sorts items and finds the maximum number of items that an assignment can contain, k
+# Finds all combinations up to k items and removed non-maximal ones
+# ONLY APPLICABLE TO IDENTICAL VALUATIONS WITHOUT FAIRNESS CRITERIA
 function generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs(bin::Knapsack, items::Vector{Item})
     # Sort items by increasing cost
     sorted_items = sort(items, by=item -> item.cost)
@@ -281,9 +318,43 @@ function generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs(bin::
     return maximal_assignments
 end
 
+# Suitable for cases with individual valuations of fairness criteria
+function generate_all_feasible_bin_assignments_using_up_to_k_combs(bin::Knapsack, items::Vector{Item})
+    # Sort items by increasing cost
+    sorted_items = sort(items, by=item -> item.cost)
+    # Greedily sum items until we hit capacity, the number of items is the max we need to calculate combinations for.
+    sum_of_cost = 0
+    n_items = 0
+    for item in sorted_items
+        if (sum_of_cost + item.cost > bin.capacity)
+            break
+        else
+            sum_of_cost += item.cost
+            n_items += 1
+        end
+    end
+    all_combinations = []
+    for i in range(1, n_items)
+        combinations_of_k_items = collect(combinations(items, i))
+        for comb in combinations_of_k_items
+            push!(all_combinations, comb)
+        end
+    end
+    feasible_assignments = []
+    for comb in all_combinations
+        current_weight = sum(item -> item.cost, comb)
+        # If the assignment is infeasible
+        if (current_weight > bin.capacity)
+            continue
+        end
+        push!(feasible_assignments, comb)
+    end
+    return feasible_assignments
+end
+
 global best_profit = 1
 
-function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int)
+function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int, reductions::Vector, generate_assignments::Function)
     upper_bound = 0
     if (length(bins) == 0 || length(items) == 0)
         if (sum_profit > best_profit)
@@ -293,14 +364,18 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
         end
         #println("Didn't ", sum_profit, " vs ", best_profit)
     else
-        #=
-        reduced_items = pisinger_r2_reduction(bins, items, best_profit)
-        if length(reduced_items) > 0
+        all_reduced_items::Vector{Item} = []
+        for reduction in reductions
+            reduced_items = reduction(bins, items, best_profit)
+            unique_removed_items = setdiff(reduced_items, all_reduced_items)
+            all_reduced_items = vcat(all_reduced_items, unique_removed_items)
+        end
+
+        if length(all_reduced_items) > 0
             #println("Current items:\n", items)
             #println("Reduced items:\n", reduced_items, "\n from instance with bins:\n", bins)
-            return search_MKP(bins, setdiff(items, reduced_items), sum_profit)
+            return search_MKP(bins, setdiff(items, all_reduced_items), sum_profit, reductions, generate_assignments)
         end
-        =#
         upper_bound = compute_max_upper_bound_individual_vals(bins, items)
     end
 
@@ -311,31 +386,29 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
     # upper bound validation - TODO
     (bin, bin_index) = get_bin_with_least_remaining_capacity(bins)
     #println("Selected ", bin, bin_index, " bound ", upper_bound)
-    assignments = sort(generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs(bin, items), rev=true)
+    assignments = sort(generate_assignments(bin, items), rev=true)
     best_assignment = (-1, [])
     #println("Assignments: ", assignments)
     for assignment in assignments
         #if not symmetric - missing pruning step here, TODO
         bins[bin_index].items = assignment
         #println("Gave knapsack ", bins[bin_index].id, " == ", bin_index, " the assignment ", assignment)
-        items_copy = deepcopy(items)
-        items_copy \ assignment
+        remaining_items = setdiff(items, assignment)
         #println("Items: ", items, "\nItems to remove: ", assignment, "\nRemaining items: ", items_copy)
-        bins_copy = deepcopy(bins)
-        bins_copy \ bin
-        subproblem = search_MKP(bins_copy, items_copy, sum_profit + sum((item) -> item.valuations[bin_index], assignment))
+        remaining_bins = setdiff(bins, [bin])
+        subproblem = search_MKP(remaining_bins, remaining_items, sum_profit + sum((item) -> item.valuations[bin_index], assignment), reductions, generate_assignments)
         if (subproblem[1] > best_assignment[1])
             best_assignment = (subproblem[1], subproblem[2] + deepcopy(bins[bin_index]))
             #println("Set best assignment to: ", best_assignment)
         end
     end
     if (length(best_assignment[2]) > 0)
-        items \ last(best_assignment[2]).items
+        items = setdiff(items, last(best_assignment[2]).items)
     end
     return best_assignment
 end
 
-function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{Item}, preprocess_items_and_bins::Bool, print_solution_after::Bool)
+function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{Item}, preprocess_items_and_bins::Bool, print_solution_after::Bool, reductions::Vector, generate_assignments::Function)
     items = sort(items, by=item -> item.valuations[1] / item.cost, rev=true)
 
     if (preprocess_items_and_bins)
@@ -344,7 +417,7 @@ function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{I
     end
 
     global best_profit = 0
-    solution = search_MKP(bins, items, 0)
+    solution = search_MKP(bins, items, 0, reductions, generate_assignments)
 
     if (print_solution_after)
         print_solution(solution)

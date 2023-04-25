@@ -11,7 +11,7 @@ function generate_items(n_items::Int, min_cost::Int, max_cost::Int, n_agents::In
     for i in range(1, n_items)
         push!(items, Item(i, rand(min_cost:max_cost), rand(min_val:max_val, n_agents)))
     end
-    println("generated", items)
+    #println("generated", items)
     return items
 end
 

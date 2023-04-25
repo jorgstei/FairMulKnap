@@ -20,21 +20,22 @@ test_knaps = [Knapsack(1, [], 100, 0), Knapsack(2, [], 100, 0), Knapsack(3, [], 
 #show(stdout, MIME("text/plain"), bin_completion_benchmark_nosort)
 #solve_multiple_knapsack_problem(test_knaps, test_items, true, true, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs)
 
-#=
+
 # Individual values 
-=#
 indiv_knaps = [Knapsack(1, [], 50, 0), Knapsack(2, [], 30, 0)]
 indiv_items = [Item(1, 10, [1, 5]), Item(2, 20, [2, 14]), Item(3, 40, [4, 8]), Item(4, 9, [5, 1]), Item(5, 9, [6, 2])]
+#=
 test_bench = @benchmark generate_all_feasible_bin_assignments_using_up_to_k_combs(copy($indiv_knaps[1]), copy($indiv_items))
 new_bench = @benchmark generate_undominated_bin_assignments(copy($indiv_knaps[1]), copy($indiv_items))
 println("Res: ", test_bench, " vs ", new_bench)
 println("K combs:\n", generate_all_feasible_bin_assignments_using_up_to_k_combs(indiv_knaps[1], indiv_items), "\n\n", length(generate_all_feasible_bin_assignments_using_up_to_k_combs(indiv_knaps[1], indiv_items)))
 println("\n\nUndominated:\n", generate_undominated_bin_assignments(indiv_knaps[1], indiv_items), "\n\n", length(generate_undominated_bin_assignments(indiv_knaps[1], indiv_items)))
+print(@benchmark solve_multiple_knapsack_problem(copy($indiv_knaps), copy($indiv_items), true, false, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs))
+print(@benchmark solve_multiple_knapsack_problem(copy($indiv_knaps), copy($indiv_items), true, false, [pisinger_r2_reduction], generate_undominated_bin_assignments))
+=#
 #test_bench = @benchmark generate_all_feasible_maximal_bin_assignments(copy($test_knaps[1]), copy($test_items))
 #new_bench = @benchmark generate_all_feasible_maximal_bin_assignments_two(copy($test_knaps[1]), copy($test_items))
 #println("Res: ", test_bench, " vs ", new_bench)
-print(@benchmark solve_multiple_knapsack_problem(copy($indiv_knaps), copy($indiv_items), true, false, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs))
-print(@benchmark solve_multiple_knapsack_problem(copy($indiv_knaps), copy($indiv_items), true, false, [pisinger_r2_reduction], generate_undominated_bin_assignments))
 #=
 no_reductions = @benchmark solve_multiple_knapsack_problem(indiv_knaps, indiv_items, true, false, [], generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs)
 normal = @benchmark solve_multiple_knapsack_problem(indiv_knaps, indiv_items, true, false, [pisinger_r2_reduction], generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs)
@@ -47,25 +48,44 @@ mutable struct BenchmarkResults
     mean_values::Matrix{Float64}
     agent_number_list::Vector{Int}
     items_number_list::Vector{Int}
+    preprocess::Bool
+    reductions::Vector
+    generate_assignments::Function
 end
+println(typeof(["asd" "hey"]), size(["asd" "hey"]))
 
-function plot_results(models::Vector{BenchmarkResults}, test_info::Vector{Int}, scaling::Int)
+function plot_results(models::Vector{BenchmarkResults}, n_agents_tuple::Tuple{Int,Int}, n_items_list::Vector{Int})
     x = models[1].agent_number_list
-    x_label = "Trial number"
-    y_label = "Time (ns)"
-    if (scaling == 1000)
-        y_label = "Time (μs)"
-    elseif (scaling == 1000000)
-        y_label = "Time (ms)"
-    elseif (scaling == 1000000000)
-        y_label = "Time (s)"
+
+    max_time = -1
+    for model in models
+        model_max = maximum(model.mean_values)
+        if model_max > max_time
+            max_time = model_max
+        end
     end
 
-    plot_title_mean = "Mean values, " * string(test_info[1]) * "-" * string(test_info[2]) * " agents, " * string(test_info[3]) * "-" * string(test_info[4]) * " items.png"
+    scaling = 1
+    y_label = "Time (ns)"
 
-    for i in 1:size(models[1].mean_values)[1]
-        p = plot(x, [models[1].mean_values[i, :] / scaling models[2].mean_values[i, :] / scaling models[3].mean_values[i, :] / scaling], xlabel="Number of agents", ylabel=y_label, title=plot_title_mean, label=["BC" "BC no pp" "JuMP - CBC"], linewidth=3)
-        savefig(p, "../results/mean_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(models[1].items_number_list[i]) * "items.png")
+    if (max_time >= 1000000000)
+        y_label = "Time (s)"
+        scaling = 1000000000
+
+    elseif (max_time >= 1000000)
+        y_label = "Time (ms)"
+        scaling = 1000000
+
+    elseif (max_time >= 1000)
+        y_label = "Time (μs)"
+        scaling = 1000
+    end
+
+
+    for (index, n_items) in enumerate(n_items_list)
+        plot_title = "Mean values, " * string(n_agents_tuple[1]) * "-" * string(n_agents_tuple[2]) * " agents, " * string(n_items) * " items"
+        p = plot(x, [res.mean_values[index, :] / scaling for res in models], xlabel="Agents", ylabel=y_label, title=plot_title, label=reshape(map((result) -> result.solve_method, models), 1, length(models)), linewidth=3)
+        savefig(p, "../results/mean_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(models[1].items_number_list[index]) * "items.png")
     end
 end
 
@@ -73,91 +93,51 @@ end
 
 
 item_list_step = 4
-n_items_list = collect(range(4, 12, step=item_list_step))
-n_agents_tuple = (4, 8)
+n_items_list = collect(range(4, 8, step=item_list_step))
+n_agents_tuple = (4, 6)
 
-fukunaga_res = BenchmarkResults("Bin completion", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
-fukunaga_without_reduction_and_pp_res = BenchmarkResults("Bin completion without R2 reduction & preprocessing", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
-fukunaga_without_reduction_and_up_to_k_and_pp_res = BenchmarkResults("Bin completion without R2 reduction, Up to K combinations & preprocessing", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
-fukunaga_without_up_to_k_res = BenchmarkResults("Bin completion without up to k combs", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
-without_maximal_res = BenchmarkResults("Non-maximal up to k", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
-cbc_res = BenchmarkResults("CBC", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list)
-test_info = [5, 10, 10, 20]
+basic_res = BenchmarkResults("R2 + up to k", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs)
+undominated = BenchmarkResults("R2 + undominated", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [pisinger_r2_reduction], generate_undominated_bin_assignments)
+cbc_res = BenchmarkResults("CBC", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, false, [], () -> ())
 
-for n_agents in n_agents_tuple[1]:n_agents_tuple[2]
+test_cases::Vector{BenchmarkResults} = [basic_res, undominated]
 
-    for n_items in n_items_list
+
+for (item_index, n_items) in enumerate(n_items_list)
+    for n_agents in n_agents_tuple[1]:n_agents_tuple[2]
 
         bench_items = generate_items(n_items, 1, 60, n_agents, 1, 20)
         bench_bins = generate_knapsacks(n_agents, 30, 120)
-
-        values = []
-        weights = []
-        capacities = []
-        for item in bench_items
-            push!(values, item.valuations[1])
-            push!(weights, item.cost)
-        end
-        for bin in bench_bins
-            push!(capacities, bin.capacity)
-        end
-        values = duplicate_vals(values, n_agents)
-        weights = duplicate_vals(weights, n_agents)
         #println("\n\n----------------------------------------------------------------------\n----------------------------------------------------------------------\n----------------------------------------------------------------------")
         println("\nTesting on instance with ", n_agents, " agents and ", n_items, " items:")
-
-        fukunaga_temp = []
-        #=
-        fukunaga_without_reduction_and_pp_temp = []
-        fukunaga_without_reduction_and_up_to_k_and_pp_temp = []
-        =#
-        fukunaga_without_up_to_k_temp = []
-        without_maximal_temp = []
-        cbc_temp = []
-
-        for i in 1:3
-            println(fukunaga_res.solve_method)
-            fukunaga_bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), true, false, [pisinger_r2_reduction], generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs)
-            show(stdout, MIME("text/plain"), fukunaga_bench)
-            #=
-            println(fukunaga_without_reduction_and_pp_res.solve_method)
-            fukunaga_bench_without_reduction_and_pp_bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), false, false, [pisinger_r2_reduction], generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs)
-            show(stdout, MIME("text/plain"), fukunaga_bench_without_reduction_and_pp_bench)
-
-
-            println(fukunaga_without_reduction_and_up_to_k_and_pp_res.solve_method)
-            fukunaga_without_reduction_and_up_to_k_and_pp_bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), false, false, [pisinger_r2_reduction], generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs)
-            show(stdout, MIME("text/plain"), fukunaga_without_reduction_and_up_to_k_and_pp_bench)
-            =#
-
-            println(fukunaga_without_up_to_k_res.solve_method)
-            fukunaga_without_up_to_k_bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), false, false, [pisinger_r2_reduction], generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs)
-            show(stdout, MIME("text/plain"), fukunaga_without_up_to_k_bench)
-
-            println(without_maximal_res.solve_method)
-            without_maximal_bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), false, false, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs)
-            show(stdout, MIME("text/plain"), without_maximal_bench)
-
-            println("\n\nCBC")
-            cbc_bench = @benchmark linear_model_solver($values, $weights, $capacities, $n_agents, $n_items)
-            show(stdout, MIME("text/plain"), cbc_bench)
-
-            push!(fukunaga_temp, mean(fukunaga_bench.times))
-            #push!(fukunaga_without_reduction_and_pp_temp, mean(fukunaga_bench_without_reduction_and_pp_bench.times))
-            #push!(fukunaga_without_reduction_and_up_to_k_and_pp_temp, mean(fukunaga_without_reduction_and_up_to_k_and_pp_bench.times))
-            push!(fukunaga_without_up_to_k_temp, mean(fukunaga_without_up_to_k_bench.times))
-            push!(without_maximal_temp, mean(without_maximal_bench.times))
-            push!(cbc_temp, mean(cbc_bench.times))
+        for test_case in test_cases
+            if test_case.solve_method == "CBC"
+                #=
+                values = []
+                weights = []
+                capacities = []
+                for item in bench_items
+                    push!(values, item.valuations[1])
+                    push!(weights, item.cost)
+                end
+                for bin in bench_bins
+                    push!(capacities, bin.capacity)
+                end
+                values = duplicate_vals(values, n_agents)
+                weights = duplicate_vals(weights, n_agents)
+                println("\n\nCBC")
+                cbc_bench = @benchmark linear_model_solver($values, $weights, $capacities, $n_agents, $n_items)
+                show(stdout, MIME("text/plain"), cbc_bench)
+                =#
+                break
+            else
+                #println("\n\n", test_case.solve_method)
+                bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), copy($test_case.preprocess), false, copy($test_case.reductions), $test_case.generate_assignments)
+                #show(stdout, MIME("text/plain"), bench)
+                test_case.mean_values[item_index, n_agents-n_agents_tuple[1]+1] = mean(bench.times)
+            end
         end
-        fukunaga_res.mean_values[div(n_items, item_list_step), n_agents-n_agents_tuple[1]+1] = mean(fukunaga_temp)
-        #fukunaga_without_reduction_and_pp_res.mean_values[div(n_items, item_list_step), n_agents-n_agents_tuple[1]+1] = mean(fukunaga_without_reduction_and_pp_temp)
-        #fukunaga_without_reduction_and_up_to_k_and_pp_res.mean_values[div(n_items, item_list_step), n_agents-n_agents_tuple[1]+1] = mean(fukunaga_without_reduction_and_up_to_k_and_pp_temp)
-        fukunaga_without_up_to_k_res.mean_values[div(n_items, item_list_step), n_agents-n_agents_tuple[1]+1] = mean(fukunaga_without_up_to_k_temp)
-        without_maximal_res.mean_values[div(n_items, item_list_step), n_agents-n_agents_tuple[1]+1] = mean(without_maximal_temp)
-        cbc_res.mean_values[div(n_items, item_list_step), n_agents-n_agents_tuple[1]+1] = mean(cbc_temp)
     end
 end
 
-println("Normal", fukunaga_without_up_to_k_res.mean_values)
-println("Without maximal", without_maximal_res.mean_values)
-plot_results([fukunaga_res, fukunaga_without_up_to_k_res, without_maximal_res, cbc_res], test_info, 1000000) #=fukunaga_without_reduction_and_pp_temp, fukunaga_without_reduction_and_up_to_k_and_pp_res,=#
+plot_results(test_cases, n_agents_tuple, n_items_list) #=fukunaga_without_reduction_and_pp_temp, fukunaga_without_reduction_and_up_to_k_and_pp_res,=#

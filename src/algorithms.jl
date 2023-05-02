@@ -1,3 +1,4 @@
+
 #=
     The choose_bin function described in "A branch and bound algorithm for hard multiple knapsack problems" - Fukunaga
 =#
@@ -79,34 +80,30 @@ end
 # solve 0-1 knapsack problem on the aggregate knapsack and return the value
 # Works for items with a single valuation
 function compute_upper_bound(bins::Vector{Knapsack}, items::Vector{Item})
-    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
+    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins; init=0), 0)
     return solve_binary_knapsack(aggregate_knapsack, items)
 end
 
 # Return the upper bound considering individual valuations
 # Compute aggregate knapsack, and assign each item it's maximum valuation before solving binary knapsack
 function compute_max_upper_bound_individual_vals(bins::Vector{Knapsack}, items::Vector{Item})
-    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
+    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins; init=0), 0)
     adjusted_items = Array{Item}(undef, 0)
+    ids_of_remaining_bins = map((bin) -> bin.id, remaining_bins)
     for item in items
-        itemcpy = Item(item.id, item.cost, fill(maximum(item.valuations), length(item.valuations)))
+        relevant_valuations = [item.valuations[i] for i in ids_of_remaining_bins]
+        itemcpy = Item(item.id, item.cost, fill(maximum(relevant_valuations), length(item.valuations)))
         push!(adjusted_items, itemcpy)
     end
     return solve_binary_knapsack(aggregate_knapsack, adjusted_items)
 end
 
-
-# Return the upper bound considering individual valuations
-# Compute aggregate knapsack, and assign each item it's maximum valuation before solving binary knapsack
-function compute_optimized_upper_bound_individual_vals(bins::Vector{Knapsack}, items::Vector{Item})
-    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
-end
-
 # The program should keep the items sorted throughout so long as the items were sorted by profit/weight initially.
 # This happens automatically in solve_multiple_knapsack_problem
+# TODO what do we do with sum_profits and individual vals?
 function pisinger_r2_reduction(bins::Vector{Knapsack}, sorted_items::Vector{Item}, lower_bound)
     # SMKP
-    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins), 0)
+    aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins; init=0), 0)
     # Find break item
     break_item = Nothing
     break_item_idx = -1
@@ -147,77 +144,60 @@ function pisinger_r2_reduction(bins::Vector{Knapsack}, sorted_items::Vector{Item
     return items_to_remove
 end
 
-
-# Tests whether the assignment is dominated by making sure x-s > r-t
-# Where x is 
-function is_assignment_dominated(included, excluded, residual_capacity)
-    # The residual capacity r of a bin is the bin capacity c minus the largest number in the bin, 
-    # which is common to all feasible completions of a given bin.
-
-    #sum_of_weights = sum_item_cost(included \ ) # t in the paper
-
-end
-
-# R. Korf 2003 - An improved Algorithm for Optimal Bin packing
-# Used to generate undominated sets for bin packing, not MKP
-function feasible(included, excluded, remaining::Vector{Item}, lower_bound, upper_bound)
-    if (length(remaining) == 0 || upper_bound == 0)
-        if (is_assignment_dominated(included, excluded, residual_capacity))
-            return
-        else
-            return (included, excluded)
-        end
-    else
-        max = find_heaviest_item(remaining)
-        if (max[2] > upper_bound)
-            remaining_copy = copy(remaining)
-            deleteat!(remaining_copy, max[1])
-            feasible(included, excluded, remaining_copy, lower_bound, upper_bound)
-        elseif (max[2] == upper_bound)
-            included_copy = copy(included)
-            push!(included_copy, remaining[max[1]])
-            remaining_copy = copy(remaining)
-            deleteat!(remaining_copy, max[1])
-            feasible(included_copy, excluded, remaining_copy, lower_bound - max[2], upper_bound - max[2])
-        else
-            included_copy = copy(included)
-            push!(included_copy, remaining[max[1]])
-            excluded_copy = copy(excluded)
-            push!(excluded_copy, remaining[max[1]])
-            remaining_copy = copy(remaining)
-            deleteat!(remaining_copy, max[1])
-
-            feasible(included_copy, excluded, remaining_copy, lower_bound - max[2], upper_bound - max[2])
-            feasible(included, excluded_copy, remaining_copy, max(lower_bound, lower_bound + max[2]), upper_bound)
-        end
-    end
-end
-
-# Used to generate feasible and undominated assignments
-# according to MKP dominance criterion Fukunaga & Korf 2007
-# Should work for 
-function generate_undominated_bin_assignments(bin::Knapsack, items::Vector{Item})
-    undominated_assignments::Vector{Vector{Item}} = []
-
-    function is_undominated(path::Vector{Item}, excluded_items::Vector{Item})
-        assignment_cost = sum((item) -> item.cost, path)
-        subsets = collect(combinations(path))
-        for item in excluded_items
-            for subset in subsets
-                subset_cost = sum((item) -> item.cost, subset)
-                subset_profit = sum((item) -> item.valuations[bin.id], subset)
-                # If feasible to swap subset with excluded item
-                if (assignment_cost - subset_cost + item.cost <= bin.capacity && item.cost >= subset_cost)
-                    # If profitable to swap subset with excluded item
-                    if (item.valuations[bin.id] >= subset_profit)
-                        # Then the assignment is dominated
-                        return false
-                    end
+# Works for MKP with identical valuations
+# MKP dominance criterion Fukunaga & Korf 2007
+# MAPPED ONE TO ONE :DDDDDDDDDDDDDDDDD TODO
+function is_undominated_identical_vals(path::Vector{Item}, excluded_items::Vector{Item})
+    assignment_cost = sum((item) -> item.cost, path)
+    subsets = collect(combinations(path))
+    for item in excluded_items
+        for subset in subsets
+            subset_cost = sum((item) -> item.cost, subset)
+            subset_profit = sum((item) -> item.valuations[bin.id], subset)
+            # If feasible to swap subset with excluded item
+            if (assignment_cost - subset_cost + item.cost <= bin.capacity)
+                # If profitable to swap subset with excluded item
+                if (item.valuations[bin.id] >= subset_profit)
+                    # Then the assignment is dominated
+                    return false
                 end
             end
         end
-        return true
     end
+    return true
+end
+
+# Works for individual valuations
+# Jørgen Steig criterion 2023 :)) 
+function is_undominated_individual_vals(bin::Knapsack, remaining_bins::Knapsack, path::Vector{Item}, excluded_items::Vector{Item})
+    assignment_cost = sum((item) -> item.cost, path; init=0)
+    subsets = collect(combinations(path))
+    for item in excluded_items
+        for subset in subsets
+            subset_cost = sum((item) -> item.cost, subset)
+            subset_profit = sum((item) -> item.valuations[bin.id], subset)
+            # If feasible to swap subset with excluded item
+            if (assignment_cost - subset_cost + item.cost <= bin.capacity && item.cost >= subset_cost)
+                ids_of_remaining_bins = map((bin) -> bin.id, remaining_bins)
+                relevant_valuations = [item.valuations[i] for i in ids_of_remaining_bins]
+                # If the value gained for current agent by swapping the subset with the item is greater than
+                # the difference in value from giving the item to the person who appreciates it the most
+                # and forcing the person who appreciates the subset the least to get the subset
+                # then giving the agent the item cannot yield a worse optimal solution, therefore the assignment is dominated
+                if (item.valuations[bin.id] - subset_profit >= max(relevant_valuations) - sum((item) -> minimum(relevant_valuations), subset))
+                    return false
+                end
+            end
+        end
+    end
+    return true
+end
+
+
+# Used to generate feasible and undominated assignments
+# Add empty set somehow TODO
+function generate_undominated_bin_assignments(bin::Knapsack, items::Vector{Item}, is_undominated::Function)
+    undominated_assignments::Vector{Vector{Item}} = []
 
     function traverse_binary_tree(remaining_capacity, path::Vector{Item}, remaining_items::Vector{Item}, excluded_items::Vector{Item})
         if length(remaining_items) == 0
@@ -340,9 +320,10 @@ function generate_all_feasible_bin_assignments_using_up_to_k_combs(bin::Knapsack
             push!(all_combinations, comb)
         end
     end
-    feasible_assignments = []
+    # Add the empty set since we need that for individual valuations to work
+    feasible_assignments = [Vector{Item}()]
     for comb in all_combinations
-        current_weight = sum(item -> item.cost, comb)
+        current_weight = sum(item -> item.cost, comb; init=0)
         # If the assignment is infeasible
         if (current_weight > bin.capacity)
             continue
@@ -354,30 +335,30 @@ end
 
 global best_profit = 1
 
-function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int, reductions::Vector, generate_assignments::Function)
-    upper_bound = 0
-    if (length(bins) == 0 || length(items) == 0)
+function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, sum_profit::Int, reductions::Vector, generate_assignments::Function, items_diff::Bool)
+    println("Subproblem called with\n", bins, "\n", all_items, "\nProfit:", sum_profit)
+    if (length(bins) == 0 || length(all_items) == 0)
         if (sum_profit > best_profit)
             global best_profit = sum_profit
-            #println("Set new best: ", sum_profit, ", ", items)
-            return (sum_profit, bins)
+            println("Set new best: ", sum_profit, ", ", all_items)
         end
-        #println("Didn't ", sum_profit, " vs ", best_profit)
-    else
-        all_reduced_items::Vector{Item} = []
-        for reduction in reductions
-            reduced_items = reduction(bins, items, best_profit)
-            unique_removed_items = setdiff(reduced_items, all_reduced_items)
-            all_reduced_items = vcat(all_reduced_items, unique_removed_items)
-        end
-
-        if length(all_reduced_items) > 0
-            #println("Current items:\n", items)
-            #println("Reduced items:\n", reduced_items, "\n from instance with bins:\n", bins)
-            return search_MKP(bins, setdiff(items, all_reduced_items), sum_profit, reductions, generate_assignments)
-        end
-        upper_bound = compute_max_upper_bound_individual_vals(bins, items)
+        return (sum_profit, bins)
     end
+
+    all_reduced_items::Vector{Item} = []
+    for reduction in reductions
+        reduced_items = reduction(bins, all_items, best_profit)
+        unique_removed_items = setdiff(reduced_items, all_reduced_items)
+        all_reduced_items = vcat(all_reduced_items, unique_removed_items)
+    end
+
+    if length(all_reduced_items) > 0
+        #println("Current items:\n", items)
+        #println("Reduced items:\n", reduced_items, "\n from instance with bins:\n", bins)
+        return search_MKP(bins, setdiff(all_items, all_reduced_items), sum_profit, reductions, generate_assignments, items_diff)
+    end
+
+    upper_bound = compute_max_upper_bound_individual_vals(bins, all_items)
 
     if (sum_profit + upper_bound <= best_profit)
         #println("Pruned ", bins, " and ", items, " sum ", sum_profit, " best ", best_profit)
@@ -385,30 +366,31 @@ function search_MKP(bins::Vector{Knapsack}, items::Vector{Item}, sum_profit::Int
     end
     # upper bound validation - TODO
     (bin, bin_index) = get_bin_with_least_remaining_capacity(bins)
-    #println("Selected ", bin, bin_index, " bound ", upper_bound)
-    assignments = sort(generate_assignments(bin, items), rev=true)
+    println("Selected ", bin, "and got bound ", upper_bound)
+    #We evaluated 11 different value ordering heuristics and found that the best performing heuristic overall was the min-cardinality-max-profit ordering, where candidate bin assignments are sorted in order of non-decreasing cardinality and ties are broken according to non-increasing order of profit
+    assignments = sort(generate_assignments(bin, all_items), rev=true)
     best_assignment = (-1, [])
-    #println("Assignments: ", assignments)
+    bin_copy = copy(bin)
+    println("Assignments: ", assignments)
     for assignment in assignments
-        #if not symmetric - missing pruning step here, TODO
-        bins[bin_index].items = assignment
+        bin_copy.items = assignment
         #println("Gave knapsack ", bins[bin_index].id, " == ", bin_index, " the assignment ", assignment)
-        remaining_items = setdiff(items, assignment)
-        #println("Items: ", items, "\nItems to remove: ", assignment, "\nRemaining items: ", items_copy)
+        remaining_items = setdiff(all_items, assignment)
+        #println("Items: ", all_items, "\nItems to remove: ", assignment, "\nRemaining items: ", remaining_items)
         remaining_bins = setdiff(bins, [bin])
-        subproblem = search_MKP(remaining_bins, remaining_items, sum_profit + sum((item) -> item.valuations[bin_index], assignment), reductions, generate_assignments)
+        #println("Bin: ", bin_copy, "\n\nBins: ", bins, "\n\nremaining: ", remaining_bins)
+        subproblem = search_MKP(remaining_bins, remaining_items, sum_profit + sum((item) -> item.valuations[bin.id], assignment; init=0), reductions, generate_assignments, items_diff)
+        #println("Subproblem:\n", subproblem)
         if (subproblem[1] > best_assignment[1])
-            best_assignment = (subproblem[1], subproblem[2] + deepcopy(bins[bin_index]))
+            best_assignment = (subproblem[1], subproblem[2] + copy(bin_copy))
             #println("Set best assignment to: ", best_assignment)
         end
-    end
-    if (length(best_assignment[2]) > 0)
-        items = setdiff(items, last(best_assignment[2]).items)
     end
     return best_assignment
 end
 
-function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{Item}, preprocess_items_and_bins::Bool, print_solution_after::Bool, reductions::Vector, generate_assignments::Function)
+function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{Item}, preprocess_items_and_bins::Bool, print_solution_after::Bool, reductions::Vector, generate_assignments::Function, items_diff::Bool)
+    # TODO maximum(valuations) ? 
     items = sort(items, by=item -> item.valuations[1] / item.cost, rev=true)
 
     if (preprocess_items_and_bins)
@@ -417,12 +399,11 @@ function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{I
     end
 
     global best_profit = 0
-    solution = search_MKP(bins, items, 0, reductions, generate_assignments)
+    solution = search_MKP(bins, items, 0, reductions, generate_assignments, items_diff)
 
     if (print_solution_after)
         print_solution(solution)
     end
-
 end
 
 
@@ -449,25 +430,6 @@ search MKP(bins, items, sumProfit)
         assign A to bin 
         search MKP(bins \ bin, items \ A, sumProfit+P j∈A pj )
 =#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

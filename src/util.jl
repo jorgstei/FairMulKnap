@@ -95,13 +95,14 @@ function print_solution(solution::Tuple)
     profit = solution[1]
     bins = solution[2]
     println("\n\nObtained solution with profit: ", profit)
-    for (idx, bin) in enumerate(bins)
+    println("With bins\n", bins)
+    for bin in bins
         println("\nBin ", bin.id, "     ", bin)
         for item in bin.items
             println(item)
         end
         println("Total capacity filled: ", sum(item -> item.cost, bin.items; init=0))
-        println("Total profit: ", sum(item -> item.valuations[idx], bin.items; init=0))
+        println("Total profit: ", sum(item -> item.valuations[bin.id], bin.items; init=0))
     end
 end
 

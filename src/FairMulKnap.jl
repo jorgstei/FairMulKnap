@@ -14,6 +14,7 @@ include("types.jl")
 include("util.jl")
 include("linear_model.jl")
 include("algorithms.jl")
+
 include("test.jl")
 
 end # module FairMulKnap

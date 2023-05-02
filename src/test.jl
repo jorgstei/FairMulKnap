@@ -92,23 +92,27 @@ end
 
 
 
-item_list_step = 4
-n_items_list = collect(range(4, 8, step=item_list_step))
-n_agents_tuple = (4, 6)
+item_list_step = 1
+n_items_list = collect(range(1, 1, step=item_list_step))
+n_agents_tuple = (1, 1)
 
 basic_res = BenchmarkResults("R2 + up to k", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs)
+no_pisinger = BenchmarkResults("Up to k, no R2", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [], generate_all_feasible_bin_assignments_using_up_to_k_combs)
 undominated = BenchmarkResults("R2 + undominated", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [pisinger_r2_reduction], generate_undominated_bin_assignments)
+
 cbc_res = BenchmarkResults("CBC", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, false, [], () -> ())
 
-test_cases::Vector{BenchmarkResults} = [basic_res, undominated]
+test_cases::Vector{BenchmarkResults} = [basic_res]
 
 
 for (item_index, n_items) in enumerate(n_items_list)
     for n_agents in n_agents_tuple[1]:n_agents_tuple[2]
 
-        bench_items = generate_items(n_items, 1, 60, n_agents, 1, 20)
-        bench_bins = generate_knapsacks(n_agents, 30, 120)
+        #bench_items = generate_items(n_items, 1, 60, n_agents, 1, 20)
+        #bench_bins = generate_knapsacks(n_agents, 30, 120)
         #println("\n\n----------------------------------------------------------------------\n----------------------------------------------------------------------\n----------------------------------------------------------------------")
+        bench_items = [Item(1, 9, [9, 12, 7, 14]), Item(2, 21, [16, 3, 10, 20]), Item(3, 16, [5, 9, 9, 1])]
+        bench_bins = [Knapsack(1, Vector{Item}(), 69, 0), Knapsack(2, Vector{Item}(), 33, 0), Knapsack(3, Vector{Item}(), 62, 0), Knapsack(4, Vector{Item}(), 72, 0)]
         println("\nTesting on instance with ", n_agents, " agents and ", n_items, " items:")
         for test_case in test_cases
             if test_case.solve_method == "CBC"
@@ -131,11 +135,19 @@ for (item_index, n_items) in enumerate(n_items_list)
                 =#
                 break
             else
-                #println("\n\n", test_case.solve_method)
-                bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), copy($test_case.preprocess), false, copy($test_case.reductions), $test_case.generate_assignments)
+                println("\n\n", test_case.solve_method)
+                #bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), copy($test_case.preprocess), false, copy($test_case.reductions), $test_case.generate_assignments)
                 #show(stdout, MIME("text/plain"), bench)
-                test_case.mean_values[item_index, n_agents-n_agents_tuple[1]+1] = mean(bench.times)
+                #test_case.mean_values[item_index, n_agents-n_agents_tuple[1]+1] = mean(bench.times)
             end
+            for bin in bench_bins
+                bin.items = []
+            end
+            display(bench_bins)
+            println("\n\n")
+            display(bench_items)
+            solve_multiple_knapsack_problem(deepcopy(bench_bins), deepcopy(bench_items), test_case.preprocess, true, test_case.reductions, test_case.generate_assignments, true)
+
         end
     end
 end

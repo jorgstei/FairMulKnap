@@ -20,7 +20,7 @@ end
 
 function is_smaller_cardinally_with_value_tie_break(items_a::Vector{Item}, items_b::Vector{Item})
     if (length(items_a) == length(items_b))
-        return sum((item) -> item.valuations[1], items_a) < sum((item) -> item.valuations[1], items_b)
+        return sum((item) -> maximum(item.valuations), items_a) < sum((item) -> maximum(item.valuations), items_b)
     else
         return length(items_a) < length(items_b)
     end
@@ -31,7 +31,7 @@ import Base: ==
 
 Base.copy(item::Item) = Item(item.id, item.cost, item.valuations)
 Base.copy(knap::Knapsack) = Knapsack(knap.id, knap.items, knap.capacity, knap.load)
-
+# TODO - unused?
 Base.isless(items_a::Vector{Item}, items_b::Vector{Item}) = is_smaller_cardinally_with_value_tie_break(items_a, items_b)
 
 Base.union(knap_a::Knapsack, knap_b::Knapsack) = Knapsack(-knap_a.id - knap_b, vcat(knap_a.items + knap_b.items), knap_a.capacity + knap_b.capacity, knap_a.load + knap_b.load)

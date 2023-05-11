@@ -23,6 +23,16 @@ function generate_knapsacks(n_knapsacks, min_capacity, max_capacity)
     return knapsacks
 end
 
+function generate_identical_items(n_items::Int, min_cost::Int, max_cost::Int, n_agents::Int, min_val::Int, max_val::Int)
+    items = Vector{Item}()
+    for i in range(1, n_items)
+        val = rand(min_val:max_val)
+        push!(items, Item(i, rand(min_cost:max_cost), repeat([val], n_agents)))
+    end
+    #println("generated", items)
+    return items
+end
+
 function sum_items(items::Vector{Item})
     load = 0
     for item in items
@@ -91,12 +101,11 @@ function remove_infeasible_knapsacks!(bins::Vector{Knapsack}, items::Vector{Item
     return removed_bins
 end
 
-function print_solution(solution::Tuple)
-    profit = solution[1]
-    bins = solution[2]
-    println("\n\nObtained solution with profit: ", profit)
-    println("With bins\n", bins)
-    for bin in bins
+function print_solution(solution::MKP_return)
+    println("\nObtained solution with profit: ", solution.best_profit)
+
+    println("With bins\n", solution.best_assignment)
+    for bin in solution.best_assignment
         println("\nBin ", bin.id, "     ", bin)
         for item in bin.items
             println(item)
@@ -104,6 +113,7 @@ function print_solution(solution::Tuple)
         println("Total capacity filled: ", sum(item -> item.cost, bin.items; init=0))
         println("Total profit: ", sum(item -> item.valuations[bin.id], bin.items; init=0))
     end
+
 end
 
 # Util for the linear model

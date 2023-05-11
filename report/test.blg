@@ -1,0 +1,17 @@
+[0] Config.pm:306> INFO - This is Biber 2.18
+[0] Config.pm:309> INFO - Logfile is 'test.blg'
+[125] biber-MSWIN64:340> INFO - === 
+[182] Biber.pm:418> INFO - Reading 'test.bcf'
+[310] Biber.pm:978> INFO - Found 13 citekeys in bib section 0
+[325] Biber.pm:4401> INFO - Processing section 0
+[337] Biber.pm:4592> INFO - Looking for bibtex file 'refs.bib' for section 0
+[413] bibtex.pm:1713> INFO - LaTeX decoding ...
+[474] bibtex.pm:1518> INFO - Found BibTeX data source 'refs.bib'
+[615] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[615] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[615] Biber.pm:4221> INFO - Sorting list 'nty/global//global/global' of type 'entry' with template 'nty' and locale 'en-US'
+[642] Biber.pm:4227> INFO - No sort tailoring available for locale 'en-US'
+[661] bbl.pm:654> INFO - Writing 'test.bbl' with encoding 'UTF-8'
+[676] bbl.pm:757> INFO - Output to test.bbl
+[677] Biber.pm:130> WARN - ISBN '978-3-642-07311-3 978-3-540-24777-7' in entry 'kellerer_knapsack_2004' is invalid - run biber with '--validate_datamodel' for details.
+[677] Biber.pm:132> INFO - WARNINGS: 1

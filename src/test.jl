@@ -20,7 +20,6 @@ test_knaps = [Knapsack(1, [], 100, 0), Knapsack(2, [], 100, 0), Knapsack(3, [], 
 #show(stdout, MIME("text/plain"), bin_completion_benchmark_nosort)
 #solve_multiple_knapsack_problem(test_knaps, test_items, true, true, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs)
 
-
 # Individual values 
 indiv_knaps = [Knapsack(1, [], 50, 0), Knapsack(2, [], 30, 0)]
 indiv_items = [Item(1, 10, [1, 5]), Item(2, 20, [2, 14]), Item(3, 40, [4, 8]), Item(4, 9, [5, 1]), Item(5, 9, [6, 2])]
@@ -43,16 +42,17 @@ reduce_all_combs = @benchmark solve_multiple_knapsack_problem(indiv_knaps, indiv
 no_reductions_and_generate_all = @benchmark solve_multiple_knapsack_problem(indiv_knaps, indiv_items, true, false, [], generate_all_feasible_maximal_bin_assignments)
 println("No reduction:", no_reductions, "\n\nNormal:", normal, "\n\nReduce all combs:", reduce_all_combs, "\n\nNada:", no_reductions_and_generate_all)
 =#
+
 mutable struct BenchmarkResults
     solve_method::String
     mean_values::Matrix{Float64}
+    nodes_explored::Matrix{Int}
     agent_number_list::Vector{Int}
     items_number_list::Vector{Int}
-    preprocess::Bool
-    reductions::Vector
-    generate_assignments::Function
+    options::MulKnapOptions
 end
-println(typeof(["asd" "hey"]), size(["asd" "hey"]))
+
+
 
 function plot_results(models::Vector{BenchmarkResults}, n_agents_tuple::Tuple{Int,Int}, n_items_list::Vector{Int})
     x = models[1].agent_number_list
@@ -68,52 +68,87 @@ function plot_results(models::Vector{BenchmarkResults}, n_agents_tuple::Tuple{In
     scaling = 1
     y_label = "Time (ns)"
 
-    if (max_time >= 1000000000)
+    if (max_time >= 1e9)
         y_label = "Time (s)"
-        scaling = 1000000000
+        scaling = 1e9
 
-    elseif (max_time >= 1000000)
+    elseif (max_time >= 1e6)
         y_label = "Time (ms)"
-        scaling = 1000000
+        scaling = 1e6
 
-    elseif (max_time >= 1000)
+    elseif (max_time >= 1e3)
         y_label = "Time (μs)"
-        scaling = 1000
+        scaling = 1e3
     end
 
 
     for (index, n_items) in enumerate(n_items_list)
-        plot_title = "Mean values, " * string(n_agents_tuple[1]) * "-" * string(n_agents_tuple[2]) * " agents, " * string(n_items) * " items"
+        plot_title = "Mean times - " * string(n_items) * " items"
         p = plot(x, [res.mean_values[index, :] / scaling for res in models], xlabel="Agents", ylabel=y_label, title=plot_title, label=reshape(map((result) -> result.solve_method, models), 1, length(models)), linewidth=3)
-        savefig(p, "../results/mean_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(models[1].items_number_list[index]) * "items.png")
+        savefig(p, "../results/mean_times/mean_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(models[1].items_number_list[index]) * "items.png")
+
+        nodes_title = "Nodes explored - " * string(n_items) * " items"
+        node_plot = plot(x, [res.nodes_explored[index, :] for res in models], xlabel="Agents", ylabel="Nodes", title=nodes_title, label=reshape(map((result) -> result.solve_method, models), 1, length(models)), linewidth=3)
+        savefig(node_plot, "../results/nodes/nodes_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(models[1].items_number_list[index]) * "items.png")
     end
 end
 
 
 
-
-item_list_step = 1
+# How big the step between n items should be, e.g. 2 makes 1, 3, 5, 7 ...
+item_list_step = 2
 n_items_list = collect(range(1, 1, step=item_list_step))
+# How many knapsacks should be generated tested, (from, to)
 n_agents_tuple = (1, 1)
+#=
+=#
+n_items_list = collect(range(2, 16, step=item_list_step))
+n_agents_tuple = (2, 7)
 
-basic_res = BenchmarkResults("R2 + up to k", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [pisinger_r2_reduction], generate_all_feasible_bin_assignments_using_up_to_k_combs)
-no_pisinger = BenchmarkResults("Up to k, no R2", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [], generate_all_feasible_bin_assignments_using_up_to_k_combs)
-undominated = BenchmarkResults("R2 + undominated", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, true, [pisinger_r2_reduction], generate_undominated_bin_assignments)
+items_x_agents = zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1))
+agent_range = range(n_agents_tuple[1], n_agents_tuple[2])
 
-cbc_res = BenchmarkResults("CBC", zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1)), range(n_agents_tuple[1], n_agents_tuple[2]), n_items_list, false, [], () -> ())
+identical = BenchmarkResults("MKP", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(false, true, [], compute_upper_bound, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
+r2 = BenchmarkResults("MKP + R2", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(false, true, [pisinger_r2_reduction], compute_upper_bound, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
 
-test_cases::Vector{BenchmarkResults} = [basic_res]
+basic_res = BenchmarkResults("Up-to-k", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, generate_all_feasible_bin_assignments_using_up_to_k_combs, () -> ()))
+undominated = BenchmarkResults("Undominated", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_r2 = BenchmarkResults("Undominated+R2", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_r2_no_sort = BenchmarkResults("Undominated+R2nosort", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_no_sort_individual_valuations], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
+
+cbc_res = BenchmarkResults("CBC", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(false, false, [], () -> (), () -> (), () -> ()))
+
+test_cases::Vector{BenchmarkResults} = [basic_res, undominated, undominated_r2, undominated_r2_no_sort]
 
 
 for (item_index, n_items) in enumerate(n_items_list)
     for n_agents in n_agents_tuple[1]:n_agents_tuple[2]
 
-        #bench_items = generate_items(n_items, 1, 60, n_agents, 1, 20)
-        #bench_bins = generate_knapsacks(n_agents, 30, 120)
-        #println("\n\n----------------------------------------------------------------------\n----------------------------------------------------------------------\n----------------------------------------------------------------------")
-        bench_items = [Item(1, 9, [9, 12, 7, 14]), Item(2, 21, [16, 3, 10, 20]), Item(3, 16, [5, 9, 9, 1])]
-        bench_bins = [Knapsack(1, Vector{Item}(), 69, 0), Knapsack(2, Vector{Item}(), 33, 0), Knapsack(3, Vector{Item}(), 62, 0), Knapsack(4, Vector{Item}(), 72, 0)]
+
+        bench_items = generate_items(n_items, 1, 60, n_agents, 1, 20)
+        bench_bins = generate_knapsacks(n_agents, 30, 120)
+        #=bench_bins = [
+            Knapsack(1, Item[], 43, 0),
+            Knapsack(2, Item[], 108, 0)
+        ]
+        bench_items = [
+            Item(1, 57, [20, 19]),
+            Item(2, 29, [10, 14]),
+            Item(3, 23, [4, 8]),
+            Item(4, 9, [16, 9]),
+            Item(5, 11, [13, 13]),
+            Item(6, 20, [18, 14]),
+            Item(7, 18, [15, 4]),
+            Item(8, 52, [8, 10]),
+            Item(9, 25, [15, 7])
+        ]
+        issue was: we didnt check if profit was higher on excluded item vs subset
+        =#
         println("\nTesting on instance with ", n_agents, " agents and ", n_items, " items:")
+        #display(bench_bins)
+        #println("\n\n")
+        #display(bench_items)
+        results = []
         for test_case in test_cases
             if test_case.solve_method == "CBC"
                 #=
@@ -135,21 +170,32 @@ for (item_index, n_items) in enumerate(n_items_list)
                 =#
                 break
             else
-                println("\n\n", test_case.solve_method)
-                #bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), copy($test_case.preprocess), false, copy($test_case.reductions), $test_case.generate_assignments)
+                println("\n", test_case.solve_method)
+                result = solve_multiple_knapsack_problem(deepcopy(bench_bins), deepcopy(bench_items), test_case.options, false)
+                bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), $test_case.options, false)
+                #println(result.nodes_explored, " nodes explored in ", mean(bench.times) / 1e6, " ms")
                 #show(stdout, MIME("text/plain"), bench)
-                #test_case.mean_values[item_index, n_agents-n_agents_tuple[1]+1] = mean(bench.times)
+                test_case.mean_values[item_index, n_agents-n_agents_tuple[1]+1] = mean(bench.times)
+                test_case.nodes_explored[item_index, n_agents-n_agents_tuple[1]+1] = result.nodes_explored
+                push!(results, result)
             end
             for bin in bench_bins
                 bin.items = []
             end
-            display(bench_bins)
-            println("\n\n")
-            display(bench_items)
-            solve_multiple_knapsack_problem(deepcopy(bench_bins), deepcopy(bench_items), test_case.preprocess, true, test_case.reductions, test_case.generate_assignments, true)
 
+            #solve_multiple_knapsack_problem(deepcopy(bench_bins), deepcopy(bench_items), test_case.preprocess, true, test_case.reductions, test_case.compute_upper_bound, test_case.generate_assignments, test_case.is_undominated, test_case.items_diff)
+        end
+        if !all(res -> res.best_profit == results[1].best_profit, results)
+            println("\n\nERROR: RESULTS DIFFER BETWEEN MODELS:\n")
+            display(bench_bins)
+            display(bench_items)
+            for res in results
+                print_solution(res)
+            end
+            println("\n\nERROR: RESULTS DIFFER BETWEEN MODELS:\n")
+            exit(1)
         end
     end
 end
 
-plot_results(test_cases, n_agents_tuple, n_items_list) #=fukunaga_without_reduction_and_pp_temp, fukunaga_without_reduction_and_up_to_k_and_pp_res,=#
+plot_results(test_cases, n_agents_tuple, n_items_list)

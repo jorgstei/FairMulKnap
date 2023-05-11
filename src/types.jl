@@ -12,6 +12,21 @@ mutable struct Knapsack
     load::Int
 end
 
+mutable struct MKP_return
+    best_profit::Int
+    best_assignment::Vector{Knapsack}
+    nodes_explored::Int
+end
+
+mutable struct MulKnapOptions
+    individual_vals::Bool
+    preprocess::Bool
+    reductions::Vector
+    compute_upper_bound::Function
+    generate_assignments::Function
+    is_undominated::Function
+end
+
 function add_knapsack_to_vector_and_return_new_vector(knapsacks::Vector{Knapsack}, knapsack_to_add::Knapsack)
     my_copy = copy(knapsacks)
     push!(my_copy, knapsack_to_add)
@@ -31,13 +46,19 @@ import Base: ==
 
 Base.copy(item::Item) = Item(item.id, item.cost, item.valuations)
 Base.copy(knap::Knapsack) = Knapsack(knap.id, knap.items, knap.capacity, knap.load)
-# TODO - unused?
+
 Base.isless(items_a::Vector{Item}, items_b::Vector{Item}) = is_smaller_cardinally_with_value_tie_break(items_a, items_b)
 
 Base.union(knap_a::Knapsack, knap_b::Knapsack) = Knapsack(-knap_a.id - knap_b, vcat(knap_a.items + knap_b.items), knap_a.capacity + knap_b.capacity, knap_a.load + knap_b.load)
 Base.:+(list::Vector{Knapsack}, knap::Knapsack) = add_knapsack_to_vector_and_return_new_vector(list, knap)
 
-#setdiff(x, y) instead of 
-#vcat istedet of + maybe?
-# maybe definer egen container-type i stedet for å overwrite metoder for 
+function is_smaller_profit_divided_by_weight(a::Item, b::Item)
+    return a.valuations[1] / a.cost < b.valuations[1] / b.cost
+end
+
+function is_smaller_max_profit_divided_by_weight(a::Item, b::Item, relevant_indices::Vector{Int})
+    return maximum([a.valuations[i] for i in relevant_indices]) / a.cost < maximum([b.valuations[i] for i in relevant_indices]) / b.cost
+end
+
+
 

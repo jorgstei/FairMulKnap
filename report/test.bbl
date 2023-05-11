@@ -1,0 +1,737 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{amanatidis_fair_2022}{misc}{}
+      \name{author}{8}{}{%
+        {{hash=26d70b086e09df324fe6da215bbedf2d}{%
+           family={Amanatidis},
+           familyi={A\bibinitperiod},
+           given={Georgios},
+           giveni={G\bibinitperiod}}}%
+        {{hash=e0d48a56694b3c162fe6961df8c6fb5b}{%
+           family={Aziz},
+           familyi={A\bibinitperiod},
+           given={Haris},
+           giveni={H\bibinitperiod}}}%
+        {{hash=49bfdcfe41abe0ed584d7452d3202a7a}{%
+           family={Birmpas},
+           familyi={B\bibinitperiod},
+           given={Georgios},
+           giveni={G\bibinitperiod}}}%
+        {{hash=54be7cb480160e9e9d1e07897b7f299d}{%
+           family={Filos-Ratsikas},
+           familyi={F\bibinithyphendelim R\bibinitperiod},
+           given={Aris},
+           giveni={A\bibinitperiod}}}%
+        {{hash=a9c8728e355996d027a7e56b60820a18}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Bo},
+           giveni={B\bibinitperiod}}}%
+        {{hash=71a70adca4fbfe9ec3ad745b0d94b8f5}{%
+           family={Moulin},
+           familyi={M\bibinitperiod},
+           given={Hervé},
+           giveni={H\bibinitperiod}}}%
+        {{hash=c9a6872fba5cbd228cae975e63ab6eed}{%
+           family={Voudouris},
+           familyi={V\bibinitperiod},
+           given={Alexandros\bibnamedelima A.},
+           giveni={A\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=c656847a4ca0b4b89eaa7c935ee453d2}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Xiaowei},
+           giveni={X\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {arXiv}%
+      }
+      \strng{namehash}{c1524a4e5d34a6c6844f3bdb89055b3e}
+      \strng{fullhash}{dc2e20bf7445cbd23f220ea8e6325a7e}
+      \strng{bibnamehash}{c1524a4e5d34a6c6844f3bdb89055b3e}
+      \strng{authorbibnamehash}{c1524a4e5d34a6c6844f3bdb89055b3e}
+      \strng{authornamehash}{c1524a4e5d34a6c6844f3bdb89055b3e}
+      \strng{authorfullhash}{dc2e20bf7445cbd23f220ea8e6325a7e}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{Allocating resources to individuals in a fair manner has been a topic of interest since ancient times, with most of the early mathematical work on the problem focusing on resources that are inﬁnitely divisible. Over the last decade, there has been a surge of papers studying computational questions regarding the indivisible case, for which exact fairness notions such as envy-freeness and proportionality are hard to satisfy. One main theme in the recent research agenda is to investigate the extent to which their relaxations, like maximin share fairness ({MMS}) and envy-freeness up to any good ({EFX}), can be achieved. In this survey, we present a comprehensive review of the progress made in the related literature by highlighting diﬀerent ways to relax fairness notions, common algorithm design techniques, and the most interesting questions for future research.}
+      \field{day}{18}
+      \field{eprinttype}{arxiv}
+      \field{langid}{english}
+      \field{month}{8}
+      \field{number}{{arXiv}:2208.08782}
+      \field{shorttitle}{Fair Division of Indivisible Goods}
+      \field{title}{Fair Division of Indivisible Goods: A Survey}
+      \field{urlday}{16}
+      \field{urlmonth}{11}
+      \field{urlyear}{2022}
+      \field{year}{2022}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{eprint}
+      \verb 2208.08782 [cs]
+      \endverb
+      \verb{file}
+      \verb Amanatidis et al. - 2022 - Fair Division of Indivisible Goods A Survey.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\MLHHLNVG\\Amanatidis et al. - 2022 - Fair Division of Indivisible Goods A Survey.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/2208.08782
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/2208.08782
+      \endverb
+      \keyw{Computer Science - Computer Science and Game Theory}
+    \endentry
+    \entry{bouveret_fair_2017}{misc}{}
+      \name{author}{5}{}{%
+        {{hash=e144236e242b79889190437fd5d01189}{%
+           family={Bouveret},
+           familyi={B\bibinitperiod},
+           given={Sylvain},
+           giveni={S\bibinitperiod}}}%
+        {{hash=3e43f76975843fa345e6cd2046efa7c2}{%
+           family={Cechlárová},
+           familyi={C\bibinitperiod},
+           given={Katarína},
+           giveni={K\bibinitperiod}}}%
+        {{hash=18eeac45dc9828022f08c558b100dba4}{%
+           family={Elkind},
+           familyi={E\bibinitperiod},
+           given={Edith},
+           giveni={E\bibinitperiod}}}%
+        {{hash=df3a6732bbc4f1a0427fb6d7e8cc542e}{%
+           family={Igarashi},
+           familyi={I\bibinitperiod},
+           given={Ayumi},
+           giveni={A\bibinitperiod}}}%
+        {{hash=8245f2110020b2a092b34580ba36d1a7}{%
+           family={Peters},
+           familyi={P\bibinitperiod},
+           given={Dominik},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {arXiv}%
+      }
+      \strng{namehash}{c05621b9f79aada104b229c033cef288}
+      \strng{fullhash}{caa15c561dcd4a6a15a66674844bfade}
+      \strng{bibnamehash}{c05621b9f79aada104b229c033cef288}
+      \strng{authorbibnamehash}{c05621b9f79aada104b229c033cef288}
+      \strng{authornamehash}{c05621b9f79aada104b229c033cef288}
+      \strng{authorfullhash}{caa15c561dcd4a6a15a66674844bfade}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{We consider fair allocation of indivisible items under an additional constraint: there is an undirected graph describing the relationship between the items, and each agent’s share must form a connected subgraph of this graph. This framework captures, e.g., fair allocation of land plots, where the graph describes the accessibility relation among the plots. We focus on agents that have additive utilities for the items, and consider several common fair division solution concepts, such as proportionality, envy-freeness and maximin share guarantee. While ﬁnding good allocations according to these solution concepts is computationally hard in general, we design efﬁcient algorithms for special cases where the underlying graph has simple structure, and/or the number of agents—or, less restrictively, the number of agent types—is small. In particular, despite non-existence results in the general case, we prove that for acyclic graphs a maximin share allocation always exists and can be found efﬁciently.}
+      \field{day}{6}
+      \field{eprinttype}{arxiv}
+      \field{langid}{english}
+      \field{month}{6}
+      \field{number}{{arXiv}:1705.10239}
+      \field{title}{Fair Division of a Graph}
+      \field{urlday}{6}
+      \field{urlmonth}{12}
+      \field{urlyear}{2022}
+      \field{year}{2017}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{eprint}
+      \verb 1705.10239 [cs]
+      \endverb
+      \verb{file}
+      \verb Bouveret et al. - 2017 - Fair Division of a Graph.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\GS7DDB4E\\Bouveret et al. - 2017 - Fair Division of a Graph.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1705.10239
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1705.10239
+      \endverb
+      \keyw{Computer Science - Computer Science and Game Theory}
+    \endentry
+    \entry{dunning_jump_2017}{article}{}
+      \name{author}{3}{}{%
+        {{hash=6a09fd9d4b66412cec2802755aa5942e}{%
+           family={Dunning},
+           familyi={D\bibinitperiod},
+           given={Iain},
+           giveni={I\bibinitperiod}}}%
+        {{hash=3d4093b368f12c6a917914c63f0d75d1}{%
+           family={Huchette},
+           familyi={H\bibinitperiod},
+           given={Joey},
+           giveni={J\bibinitperiod}}}%
+        {{hash=ae562f612365bfa1287b8268e8b021df}{%
+           family={Lubin},
+           familyi={L\bibinitperiod},
+           given={Miles},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{298dd979b252c07511d86580ba18757c}
+      \strng{fullhash}{298dd979b252c07511d86580ba18757c}
+      \strng{bibnamehash}{298dd979b252c07511d86580ba18757c}
+      \strng{authorbibnamehash}{298dd979b252c07511d86580ba18757c}
+      \strng{authornamehash}{298dd979b252c07511d86580ba18757c}
+      \strng{authorfullhash}{298dd979b252c07511d86580ba18757c}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{{JuMP} is an open-source modeling language that allows users to express a wide range of optimization problems (linear, mixed-integer, quadratic, conic-quadratic, semideﬁnite, and nonlinear) in a high-level, algebraic syntax. {JuMP} takes advantage of advanced features of the Julia programming language to oﬀer unique functionality while achieving performance on par with commercial modeling tools for standard tasks. In this work we will provide benchmarks, present the novel aspects of the implementation, and discuss how {JuMP} can be extended to new problem classes and composed with state-of-the-art tools for visualization and interactivity.}
+      \field{issn}{0036-1445, 1095-7200}
+      \field{journaltitle}{{SIAM} Review}
+      \field{langid}{english}
+      \field{month}{1}
+      \field{number}{2}
+      \field{shortjournal}{{SIAM} Rev.}
+      \field{shorttitle}{{JuMP}}
+      \field{title}{{JuMP}: A Modeling Language for Mathematical Optimization}
+      \field{urlday}{9}
+      \field{urlmonth}{12}
+      \field{urlyear}{2022}
+      \field{volume}{59}
+      \field{year}{2017}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{295\bibrangedash 320}
+      \range{pages}{26}
+      \verb{doi}
+      \verb 10.1137/15M1020575
+      \endverb
+      \verb{file}
+      \verb Dunning et al. - 2017 - JuMP A Modeling Language for Mathematical Optimiz.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\7FM5KFT8\\Dunning et al. - 2017 - JuMP A Modeling Language for Mathematical Optimiz.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://epubs.siam.org/doi/10.1137/15M1020575
+      \endverb
+      \verb{url}
+      \verb https://epubs.siam.org/doi/10.1137/15M1020575
+      \endverb
+    \endentry
+    \entry{fukunaga_bin_2007}{article}{}
+      \name{author}{2}{}{%
+        {{hash=d527c897894be05548c17fd61765fbfa}{%
+           family={Fukunaga},
+           familyi={F\bibinitperiod},
+           given={A.\bibnamedelimi S.},
+           giveni={A\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=8980d2bdb255071dca218f4193bf365d}{%
+           family={Korf},
+           familyi={K\bibinitperiod},
+           given={R.\bibnamedelimi E.},
+           giveni={R\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+      }
+      \strng{namehash}{2bb69d711781b4fde3610071d966e432}
+      \strng{fullhash}{2bb69d711781b4fde3610071d966e432}
+      \strng{bibnamehash}{2bb69d711781b4fde3610071d966e432}
+      \strng{authorbibnamehash}{2bb69d711781b4fde3610071d966e432}
+      \strng{authornamehash}{2bb69d711781b4fde3610071d966e432}
+      \strng{authorfullhash}{2bb69d711781b4fde3610071d966e432}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Many combinatorial optimization problems such as the bin packing and multiple knapsack problems involve assigning a set of discrete objects to multiple containers. These problems can be used to model task and resource allocation problems in multi-agent systems and distributed systms, and can also be found as subproblems of scheduling problems. We propose bin completion, a branch-and-bound strategy for one-dimensional, multicontainer packing problems. Bin completion combines a bin-oriented search space with a powerful dominance criterion that enables us to prune much of the space. The performance of the basic bin completion framework can be enhanced by using a number of extensions, including nogood-based pruning techniques that allow further exploitation of the dominance criterion. Bin completion is applied to four problems: multiple knapsack, bin covering, min-cost covering, and bin packing. We show that our bin completion algorithms yield new, state-of-the-art results for the multiple knapsack, bin covering, and min-cost covering problems, outperforming previous algorithms by several orders of magnitude with respect to runtime on some classes of hard, random problem instances. For the bin packing problem, we demonstrate signiﬁcant improvements compared to most previous results, but show that bin completion is not competitive with current state-of-the-art cutting-stock based approaches.}
+      \field{day}{30}
+      \field{issn}{1076-9757}
+      \field{journaltitle}{Journal of Artificial Intelligence Research}
+      \field{langid}{english}
+      \field{month}{3}
+      \field{shortjournal}{jair}
+      \field{title}{Bin Completion Algorithms for Multicontainer Packing, Knapsack, and Covering Problems}
+      \field{urlday}{3}
+      \field{urlmonth}{11}
+      \field{urlyear}{2022}
+      \field{volume}{28}
+      \field{year}{2007}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{393\bibrangedash 429}
+      \range{pages}{37}
+      \verb{doi}
+      \verb 10.1613/jair.2106
+      \endverb
+      \verb{file}
+      \verb Fukunaga and Korf - 2007 - Bin Completion Algorithms for Multicontainer Packi.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\ZUKGZ645\\Fukunaga and Korf - 2007 - Bin Completion Algorithms for Multicontainer Packi.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://jair.org/index.php/jair/article/view/10492
+      \endverb
+      \verb{url}
+      \verb https://jair.org/index.php/jair/article/view/10492
+      \endverb
+    \endentry
+    \entry{fukunaga_branch-and-bound_2011}{article}{}
+      \name{author}{1}{}{%
+        {{hash=e77cba2ef47116a4c780b2dc189c830a}{%
+           family={Fukunaga},
+           familyi={F\bibinitperiod},
+           given={Alex\bibnamedelima S.},
+           giveni={A\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \strng{namehash}{e77cba2ef47116a4c780b2dc189c830a}
+      \strng{fullhash}{e77cba2ef47116a4c780b2dc189c830a}
+      \strng{bibnamehash}{e77cba2ef47116a4c780b2dc189c830a}
+      \strng{authorbibnamehash}{e77cba2ef47116a4c780b2dc189c830a}
+      \strng{authornamehash}{e77cba2ef47116a4c780b2dc189c830a}
+      \strng{authorfullhash}{e77cba2ef47116a4c780b2dc189c830a}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The multiple knapsack problem ({MKP}) is a classical combinatorial optimization problem. A recent algorithm for some classes of the {MKP} is bin-completion, a bin-oriented, branch-and-bound algorithm. In this paper, we propose path-symmetry and path-dominance criteria for pruning nodes in the {MKP} branch-and-bound search space. In addition, we integrate the “bound-and-bound” upper bound validation technique used in previous {MKP} solvers. We show experimentally that our new {MKP} solver, which successfully integrates dominance based pruning, symmetry breaking, and bound-and-bound, signiﬁcantly outperforms previous solvers on some classes of hard problem instances.}
+      \field{issn}{0254-5330, 1572-9338}
+      \field{journaltitle}{Annals of Operations Research}
+      \field{langid}{english}
+      \field{month}{4}
+      \field{number}{1}
+      \field{shortjournal}{Ann Oper Res}
+      \field{title}{A branch-and-bound algorithm for hard multiple knapsack problems}
+      \field{urlday}{10}
+      \field{urlmonth}{10}
+      \field{urlyear}{2022}
+      \field{volume}{184}
+      \field{year}{2011}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{97\bibrangedash 119}
+      \range{pages}{23}
+      \verb{doi}
+      \verb 10.1007/s10479-009-0660-y
+      \endverb
+      \verb{file}
+      \verb Fukunaga - 2011 - A branch-and-bound algorithm for hard multiple kna.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\P9P3KCK8\\Fukunaga - 2011 - A branch-and-bound algorithm for hard multiple kna.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://link.springer.com/10.1007/s10479-009-0660-y
+      \endverb
+      \verb{url}
+      \verb http://link.springer.com/10.1007/s10479-009-0660-y
+      \endverb
+      \keyw{bb,multiple knapsack}
+    \endentry
+    \entry{hetland_mlhetlandallocationsjl_nodate}{online}{}
+      \name{author}{1}{}{%
+        {{hash=c172749719088f569e41fee6d5fa62a2}{%
+           family={Hetland},
+           familyi={H\bibinitperiod},
+           given={Magnus\bibnamedelima Lie},
+           giveni={M\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+      }
+      \strng{namehash}{c172749719088f569e41fee6d5fa62a2}
+      \strng{fullhash}{c172749719088f569e41fee6d5fa62a2}
+      \strng{bibnamehash}{c172749719088f569e41fee6d5fa62a2}
+      \strng{authorbibnamehash}{c172749719088f569e41fee6d5fa62a2}
+      \strng{authornamehash}{c172749719088f569e41fee6d5fa62a2}
+      \strng{authorfullhash}{c172749719088f569e41fee6d5fa62a2}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{mlhetland/Allocations.jl: Algorithms for fair item allocation.}
+      \field{titleaddon}{{GitHub}}
+      \field{urlday}{9}
+      \field{urlmonth}{12}
+      \field{urlyear}{2022}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb GitHub - mlhetland/Allocations.jl\: Algorithms for fair item allocation.:C\:\\Users\\jorsx\\Zotero\\storage\\VIVVWPLJ\\Allocations.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://github.com/mlhetland/Allocations.jl
+      \endverb
+      \verb{url}
+      \verb https://github.com/mlhetland/Allocations.jl
+      \endverb
+    \endentry
+    \entry{hummel_fair_2021}{article}{}
+      \name{author}{2}{}{%
+        {{hash=3e0ee3f1df4c536a122a7cb1d1ff6e3a}{%
+           family={Hummel},
+           familyi={H\bibinitperiod},
+           given={Halvard},
+           giveni={H\bibinitperiod}}}%
+        {{hash=c172749719088f569e41fee6d5fa62a2}{%
+           family={Hetland},
+           familyi={H\bibinitperiod},
+           given={Magnus\bibnamedelima Lie},
+           giveni={M\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+      }
+      \strng{namehash}{87dd39611543ec1cd829594ed755d2ab}
+      \strng{fullhash}{87dd39611543ec1cd829594ed755d2ab}
+      \strng{bibnamehash}{87dd39611543ec1cd829594ed755d2ab}
+      \strng{authorbibnamehash}{87dd39611543ec1cd829594ed755d2ab}
+      \strng{authornamehash}{87dd39611543ec1cd829594ed755d2ab}
+      \strng{authorfullhash}{87dd39611543ec1cd829594ed755d2ab}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{We study fair allocation of indivisible items, where the items are furnished with a set of conflicts, and agents are not permitted to receive conflicting items. This kind of constraint captures, for example, participating in events that overlap in time, or taking on roles in the presence of conflicting interests. We demonstrate, both theoretically and experimentally, that fairness characterizations such as {EF}1, {MMS} and {MNW} still are applicable and useful under item conflicts. Among other existence, non-existence and computability results, we show that a \$\$1/{\textbackslash}Delta \$\$-approximate {MMS} allocation for n agents may be found in polynomial time when \$\$n{>}{\textbackslash}Delta {>}2\$\$, for any conflict graph with maximum degree \$\${\textbackslash}Delta\$\$, and that, if \$\$n {>} {\textbackslash}Delta \$\$, a 1/3-approximate {MMS} allocation always exists.}
+      \field{day}{23}
+      \field{issn}{1573-7454}
+      \field{journaltitle}{Autonomous Agents and Multi-Agent Systems}
+      \field{month}{12}
+      \field{number}{1}
+      \field{title}{Fair allocation of conflicting items}
+      \field{urlday}{6}
+      \field{urlmonth}{12}
+      \field{urlyear}{2022}
+      \field{volume}{36}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{8}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1007/s10458-021-09537-3
+      \endverb
+      \verb{file}
+      \verb Full Text PDF:C\:\\Users\\jorsx\\Zotero\\storage\\ML4X8IKM\\Hummel and Hetland - 2021 - Fair allocation of conflicting items.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1007/s10458-021-09537-3
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1007/s10458-021-09537-3
+      \endverb
+      \keyw{Approximation,Fair allocation,Graph coloring}
+    \endentry
+    \entry{kellerer_knapsack_2004}{book}{}
+      \name{author}{3}{}{%
+        {{hash=e79680cb83ebea5fa1a762689d5335c4}{%
+           family={Kellerer},
+           familyi={K\bibinitperiod},
+           given={Hans},
+           giveni={H\bibinitperiod}}}%
+        {{hash=00ea941e00e53f29eb1844689b8d6578}{%
+           family={Pferschy},
+           familyi={P\bibinitperiod},
+           given={Ulrich},
+           giveni={U\bibinitperiod}}}%
+        {{hash=27c28bde78e62d4964a22364b7887154}{%
+           family={Pisinger},
+           familyi={P\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Berlin, Heidelberg}%
+      }
+      \list{publisher}{1}{%
+        {Springer Berlin Heidelberg}%
+      }
+      \strng{namehash}{5941c1ba86f3766aab541a06fcb68065}
+      \strng{fullhash}{5941c1ba86f3766aab541a06fcb68065}
+      \strng{bibnamehash}{5941c1ba86f3766aab541a06fcb68065}
+      \strng{authorbibnamehash}{5941c1ba86f3766aab541a06fcb68065}
+      \strng{authornamehash}{5941c1ba86f3766aab541a06fcb68065}
+      \strng{authorfullhash}{5941c1ba86f3766aab541a06fcb68065}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{978-3-642-07311-3 978-3-540-24777-7}
+      \field{langid}{english}
+      \field{title}{Knapsack Problems}
+      \field{urlday}{10}
+      \field{urlmonth}{10}
+      \field{urlyear}{2022}
+      \field{year}{2004}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{doi}
+      \verb 10.1007/978-3-540-24777-7
+      \endverb
+      \verb{file}
+      \verb Kellerer et al. - 2004 - Knapsack Problems.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\2PTNX8ML\\Kellerer et al. - 2004 - Knapsack Problems.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://link.springer.com/10.1007/978-3-540-24777-7
+      \endverb
+      \verb{url}
+      \verb http://link.springer.com/10.1007/978-3-540-24777-7
+      \endverb
+      \keyw{multiple knapsack}
+    \endentry
+    \entry{martello_bound_1981}{article}{}
+      \name{author}{2}{}{%
+        {{hash=355dcd3e47338d7e940120cc6c363cb7}{%
+           family={Martello},
+           familyi={M\bibinitperiod},
+           given={Silvano},
+           giveni={S\bibinitperiod}}}%
+        {{hash=16fc2b730a7a7c0fc6b31098630baaef}{%
+           family={Toth},
+           familyi={T\bibinitperiod},
+           given={Paolo},
+           giveni={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{66ac28f2cc959050b6bd97bfdf6abe39}
+      \strng{fullhash}{66ac28f2cc959050b6bd97bfdf6abe39}
+      \strng{bibnamehash}{66ac28f2cc959050b6bd97bfdf6abe39}
+      \strng{authorbibnamehash}{66ac28f2cc959050b6bd97bfdf6abe39}
+      \strng{authornamehash}{66ac28f2cc959050b6bd97bfdf6abe39}
+      \strng{authorfullhash}{66ac28f2cc959050b6bd97bfdf6abe39}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{By the term “Bound and Bound” we define a particular tree-search technique for the {ILP}, which, for a maximization problem, makes use of a lower bound to determine the branches to follow in the decision tree. This technique is applied to the solution of the Zero-One Multiple Knapsack Problem and an algorithm is derived; an illustrative example of the procedure is provided. We present extensive computational results showing that the method is capable of solving problems up to 4 knapsacks and 200 variables with running times considerably smaller than those of the most commonly utilized algorithms.}
+      \field{day}{1}
+      \field{issn}{0166-218X}
+      \field{journaltitle}{Discrete Applied Mathematics}
+      \field{langid}{english}
+      \field{month}{11}
+      \field{number}{4}
+      \field{series}{Special Copy}
+      \field{shortjournal}{Discrete Applied Mathematics}
+      \field{title}{A Bound and Bound algorithm for the zero-one multiple knapsack problem}
+      \field{urlday}{10}
+      \field{urlmonth}{12}
+      \field{urlyear}{2022}
+      \field{volume}{3}
+      \field{year}{1981}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{275\bibrangedash 288}
+      \range{pages}{14}
+      \verb{doi}
+      \verb 10.1016/0166-218X(81)90005-6
+      \endverb
+      \verb{file}
+      \verb ScienceDirect Full Text PDF:C\:\\Users\\jorsx\\Zotero\\storage\\ANUKUGYP\\Martello and Toth - 1981 - A Bound and Bound algorithm for the zero-one multi.pdf:application/pdf;ScienceDirect Snapshot:C\:\\Users\\jorsx\\Zotero\\storage\\WMRGDJSM\\0166218X81900056.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/pii/0166218X81900056
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/pii/0166218X81900056
+      \endverb
+    \endentry
+    \entry{pisinger_exact_nodate}{online}{}
+      \name{author}{1}{}{%
+        {{hash=27c28bde78e62d4964a22364b7887154}{%
+           family={Pisinger},
+           familyi={P\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{27c28bde78e62d4964a22364b7887154}
+      \strng{fullhash}{27c28bde78e62d4964a22364b7887154}
+      \strng{bibnamehash}{27c28bde78e62d4964a22364b7887154}
+      \strng{authorbibnamehash}{27c28bde78e62d4964a22364b7887154}
+      \strng{authornamehash}{27c28bde78e62d4964a22364b7887154}
+      \strng{authorfullhash}{27c28bde78e62d4964a22364b7887154}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{langid}{english}
+      \field{shorttitle}{{PII}}
+      \field{title}{An exact algorithm for large multiple knapsack problems}
+      \field{urlday}{27}
+      \field{urlmonth}{10}
+      \field{urlyear}{2022}
+      \field{urldateera}{ce}
+      \verb{doi}
+      \verb 10.1016/S0377-2217(98)00120-9
+      \endverb
+      \verb{file}
+      \verb Full Text PDF:C\:\\Users\\jorsx\\Zotero\\storage\\SIESQJ34\\PII S0377-2217(98)00120-9 Elsevier Enhanced Rea.pdf:application/pdf;Snapshot:C\:\\Users\\jorsx\\Zotero\\storage\\CLPUSEWZ\\S0377221798001209.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/abs/pii/S0377221798001209
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/abs/pii/S0377221798001209
+      \endverb
+    \endentry
+    \entry{suksompong_constraints_2021}{article}{}
+      \name{author}{1}{}{%
+        {{hash=394c573f5ce4558eaffe3a6e4eaa967f}{%
+           family={Suksompong},
+           familyi={S\bibinitperiod},
+           given={Warut},
+           giveni={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{394c573f5ce4558eaffe3a6e4eaa967f}
+      \strng{fullhash}{394c573f5ce4558eaffe3a6e4eaa967f}
+      \strng{bibnamehash}{394c573f5ce4558eaffe3a6e4eaa967f}
+      \strng{authorbibnamehash}{394c573f5ce4558eaffe3a6e4eaa967f}
+      \strng{authornamehash}{394c573f5ce4558eaffe3a6e4eaa967f}
+      \strng{authorfullhash}{394c573f5ce4558eaffe3a6e4eaa967f}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The fair allocation of resources to interested agents is a fundamental problem in society. While the majority of the fair division literature assumes that all allocations are feasible, in practice there are often constraints on the allocation that can be chosen. In this survey, we discuss fairness guarantees for both divisible (cake cutting) and indivisible resources under several common types of constraints, including connectivity, cardinality, matroid, geometric, separation, budget, and conflict constraints. We also outline a number of open questions and directions.}
+      \field{issn}{1551-9031}
+      \field{journaltitle}{{ACM} {SIGecom} Exchanges}
+      \field{langid}{english}
+      \field{month}{11}
+      \field{number}{2}
+      \field{shortjournal}{{SIGecom} Exch.}
+      \field{title}{Constraints in fair division}
+      \field{urlday}{22}
+      \field{urlmonth}{9}
+      \field{urlyear}{2022}
+      \field{volume}{19}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{46\bibrangedash 61}
+      \range{pages}{16}
+      \verb{doi}
+      \verb 10.1145/3505156.3505162
+      \endverb
+      \verb{file}
+      \verb Suksompong - 2021 - Constraints in fair division.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\GIPTIXMI\\Suksompong - 2021 - Constraints in fair division.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/3505156.3505162
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/3505156.3505162
+      \endverb
+      \keyw{survey}
+    \endentry
+    \entry{wu_budget-feasible_2020}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=c656847a4ca0b4b89eaa7c935ee453d2}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Xiaowei},
+           giveni={X\bibinitperiod}}}%
+        {{hash=a9c8728e355996d027a7e56b60820a18}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Bo},
+           giveni={B\bibinitperiod}}}%
+        {{hash=e4af87f24b163e05231e4d1cd8cdeae9}{%
+           family={Gan},
+           familyi={G\bibinitperiod},
+           given={Jiarui},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {arXiv}%
+      }
+      \strng{namehash}{951e7c40a0f211b5673b28fcd1ec5f28}
+      \strng{fullhash}{951e7c40a0f211b5673b28fcd1ec5f28}
+      \strng{bibnamehash}{951e7c40a0f211b5673b28fcd1ec5f28}
+      \strng{authorbibnamehash}{951e7c40a0f211b5673b28fcd1ec5f28}
+      \strng{authornamehash}{951e7c40a0f211b5673b28fcd1ec5f28}
+      \strng{authorfullhash}{951e7c40a0f211b5673b28fcd1ec5f28}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The Nash social welfare ({NSW}) is a well-known social welfare measurement that balances individual utilities and the overall efficiency. In the context of fair allocation of indivisible goods, it has been shown by Caragiannis et al. ({EC} 2016 and {TEAC} 2019) that an allocation maximizing the {NSW} is envy-free up to one good ({EF}1). In this paper, we are interested in the fairness of the {NSW} in a budget-feasible allocation problem, in which each item has a cost that will be incurred to the agent it is allocated to, and each agent has a budget constraint on the total cost of items she receives. We show that a budget-feasible allocation that maximizes the {NSW} achieves a 1/4-approximation of {EF}1 and the approximation ratio is tight. The approximation ratio improves gracefully when the items have small costs compared with the agents' budgets; it converges to 1/2 when the budget-cost ratio approaches infinity.}
+      \field{day}{7}
+      \field{eprinttype}{arxiv}
+      \field{month}{12}
+      \field{number}{{arXiv}:2012.03766}
+      \field{title}{Budget-feasible Maximum Nash Social Welfare Allocation is Almost Envy-free}
+      \field{urlday}{22}
+      \field{urlmonth}{9}
+      \field{urlyear}{2022}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{doi}
+      \verb 10.48550/arXiv.2012.03766
+      \endverb
+      \verb{eprint}
+      \verb 2012.03766 [cs]
+      \endverb
+      \verb{file}
+      \verb arXiv Fulltext PDF:C\:\\Users\\jorsx\\Zotero\\storage\\9KXBY3IV\\Wu et al. - 2020 - Budget-feasible Maximum Nash Social Welfare Alloca.pdf:application/pdf;arXiv.org Snapshot:C\:\\Users\\jorsx\\Zotero\\storage\\2S6N65DF\\2012.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/2012.03766
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/2012.03766
+      \endverb
+      \keyw{Computer Science - Computer Science and Game Theory,Computer Science - Multiagent Systems}
+    \endentry
+    \entry{zhang_complexity_1986}{article}{}
+      \name{author}{2}{}{%
+        {{hash=c54d1012edcfe22f3d0d9fccc13d893a}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Li’ang},
+           giveni={L\bibinitperiod}}}%
+        {{hash=ba01e325c1584bc726bdd2e4c36e1c92}{%
+           family={Geng},
+           familyi={G\bibinitperiod},
+           given={Suyun},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{d2f60a58f7aa338c33ece83673c34d0b}
+      \strng{fullhash}{d2f60a58f7aa338c33ece83673c34d0b}
+      \strng{bibnamehash}{d2f60a58f7aa338c33ece83673c34d0b}
+      \strng{authorbibnamehash}{d2f60a58f7aa338c33ece83673c34d0b}
+      \strng{authornamehash}{d2f60a58f7aa338c33ece83673c34d0b}
+      \strng{authorfullhash}{d2f60a58f7aa338c33ece83673c34d0b}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{In this paper complexity of the 0/1 multi-knapsack problem is discussed. First we prove that the correspondingdecisionproblem is {NP}-completein the strong sense. For any fixed number k of knapsacks, the problem is only {NP}-completein the ordinarysense, but not {NP}-completein the strong sense. Then, we prove that the 0/1 multi-knapsack optimization problem is {NP}-equivalent by using Turing reduction.}
+      \field{issn}{1000-9000, 1860-4749}
+      \field{journaltitle}{Journal of Computer Science and Technology}
+      \field{langid}{english}
+      \field{month}{3}
+      \field{number}{1}
+      \field{shortjournal}{J. of Compt. Sci. \& Technol.}
+      \field{title}{The complexity of the 0/1 multi-knapsack problem}
+      \field{urlday}{9}
+      \field{urlmonth}{12}
+      \field{urlyear}{2022}
+      \field{volume}{1}
+      \field{year}{1986}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{46\bibrangedash 50}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1007/BF02943300
+      \endverb
+      \verb{file}
+      \verb Zhang and Geng - 1986 - The complexity of the 01 multi-knapsack problem.pdf:C\:\\Users\\jorsx\\Zotero\\storage\\GCW87D2G\\Zhang and Geng - 1986 - The complexity of the 01 multi-knapsack problem.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://link.springer.com/10.1007/BF02943300
+      \endverb
+      \verb{url}
+      \verb http://link.springer.com/10.1007/BF02943300
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

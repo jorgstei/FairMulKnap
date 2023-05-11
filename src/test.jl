@@ -54,12 +54,12 @@ end
 
 
 
-function plot_results(models::Vector{BenchmarkResults}, n_agents_tuple::Tuple{Int,Int}, n_items_list::Vector{Int})
+function plot_results(models::Vector{BenchmarkResults}, n_items::Int, n_items_index::Int)
     x = models[1].agent_number_list
 
     max_time = -1
     for model in models
-        model_max = maximum(model.mean_values)
+        model_max = maximum(model.mean_values[n_items_index, :])
         if model_max > max_time
             max_time = model_max
         end
@@ -81,16 +81,14 @@ function plot_results(models::Vector{BenchmarkResults}, n_agents_tuple::Tuple{In
         scaling = 1e3
     end
 
+    plot_title = "Mean times - " * string(n_items) * " items"
+    p = plot(x, [res.mean_values[n_items_index, :] / scaling for res in models], xlabel="Agents", ylabel=y_label, title=plot_title, label=reshape(map((result) -> result.solve_method, models), 1, length(models)), linewidth=3)
+    savefig(p, "../results/mean_times/mean_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(n_items) * "items.png")
 
-    for (index, n_items) in enumerate(n_items_list)
-        plot_title = "Mean times - " * string(n_items) * " items"
-        p = plot(x, [res.mean_values[index, :] / scaling for res in models], xlabel="Agents", ylabel=y_label, title=plot_title, label=reshape(map((result) -> result.solve_method, models), 1, length(models)), linewidth=3)
-        savefig(p, "../results/mean_times/mean_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(models[1].items_number_list[index]) * "items.png")
+    nodes_title = "Nodes explored - " * string(n_items) * " items"
+    node_plot = plot(x, [res.nodes_explored[n_items_index, :] for res in models], xlabel="Agents", ylabel="Nodes", title=nodes_title, label=reshape(map((result) -> result.solve_method, models), 1, length(models)), linewidth=3)
+    savefig(node_plot, "../results/nodes/nodes_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(n_items) * "items.png")
 
-        nodes_title = "Nodes explored - " * string(n_items) * " items"
-        node_plot = plot(x, [res.nodes_explored[index, :] for res in models], xlabel="Agents", ylabel="Nodes", title=nodes_title, label=reshape(map((result) -> result.solve_method, models), 1, length(models)), linewidth=3)
-        savefig(node_plot, "../results/nodes/nodes_" * string(models[1].agent_number_list[1]) * "-" * string(models[1].agent_number_list[end]) * "agents_" * string(models[1].items_number_list[index]) * "items.png")
-    end
 end
 
 
@@ -102,23 +100,26 @@ n_items_list = collect(range(1, 1, step=item_list_step))
 n_agents_tuple = (1, 1)
 #=
 =#
-n_items_list = collect(range(2, 16, step=item_list_step))
-n_agents_tuple = (2, 7)
+n_items_list = collect(range(6, 18, step=item_list_step))
+n_agents_tuple = (2, 6)
 
-items_x_agents = zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1))
+function init_items_x_agents_matrix()
+    return zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1))
+end
+#display(items_x_agents[1, :])
 agent_range = range(n_agents_tuple[1], n_agents_tuple[2])
 
-identical = BenchmarkResults("MKP", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(false, true, [], compute_upper_bound, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
-r2 = BenchmarkResults("MKP + R2", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(false, true, [pisinger_r2_reduction], compute_upper_bound, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
+identical = BenchmarkResults("MKP", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, true, [], compute_upper_bound, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
+r2 = BenchmarkResults("MKP + R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, true, [pisinger_r2_reduction], compute_upper_bound, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
 
-basic_res = BenchmarkResults("Up-to-k", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, generate_all_feasible_bin_assignments_using_up_to_k_combs, () -> ()))
-undominated = BenchmarkResults("Undominated", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_r2 = BenchmarkResults("Undominated+R2", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_r2_no_sort = BenchmarkResults("Undominated+R2nosort", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_no_sort_individual_valuations], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
+basic_res = BenchmarkResults("Up-to-k", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, generate_all_feasible_bin_assignments_using_up_to_k_combs, () -> ()))
+undominated = BenchmarkResults("Undominated", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_r2 = BenchmarkResults("Undominated+R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_r2_no_sort = BenchmarkResults("Undominated+R2nosort", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_no_sort_individual_valuations], compute_max_upper_bound_individual_vals, generate_undominated_bin_assignments, is_undominated_individual_vals))
 
-cbc_res = BenchmarkResults("CBC", items_x_agents, items_x_agents, agent_range, n_items_list, MulKnapOptions(false, false, [], () -> (), () -> (), () -> ()))
+cbc_res = BenchmarkResults("CBC", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, false, [], () -> (), () -> (), () -> ()))
 
-test_cases::Vector{BenchmarkResults} = [basic_res, undominated, undominated_r2, undominated_r2_no_sort]
+test_cases::Vector{BenchmarkResults} = [basic_res, undominated]
 
 
 for (item_index, n_items) in enumerate(n_items_list)
@@ -173,7 +174,7 @@ for (item_index, n_items) in enumerate(n_items_list)
                 println("\n", test_case.solve_method)
                 result = solve_multiple_knapsack_problem(deepcopy(bench_bins), deepcopy(bench_items), test_case.options, false)
                 bench = @benchmark solve_multiple_knapsack_problem(copy($bench_bins), copy($bench_items), $test_case.options, false)
-                #println(result.nodes_explored, " nodes explored in ", mean(bench.times) / 1e6, " ms")
+                println(result.nodes_explored, " nodes explored in ", mean(bench.times) / 1e6, " ms")
                 #show(stdout, MIME("text/plain"), bench)
                 test_case.mean_values[item_index, n_agents-n_agents_tuple[1]+1] = mean(bench.times)
                 test_case.nodes_explored[item_index, n_agents-n_agents_tuple[1]+1] = result.nodes_explored
@@ -182,8 +183,6 @@ for (item_index, n_items) in enumerate(n_items_list)
             for bin in bench_bins
                 bin.items = []
             end
-
-            #solve_multiple_knapsack_problem(deepcopy(bench_bins), deepcopy(bench_items), test_case.preprocess, true, test_case.reductions, test_case.compute_upper_bound, test_case.generate_assignments, test_case.is_undominated, test_case.items_diff)
         end
         if !all(res -> res.best_profit == results[1].best_profit, results)
             println("\n\nERROR: RESULTS DIFFER BETWEEN MODELS:\n")
@@ -196,6 +195,6 @@ for (item_index, n_items) in enumerate(n_items_list)
             exit(1)
         end
     end
+    plot_results(test_cases, n_items, item_index)
 end
 
-plot_results(test_cases, n_agents_tuple, n_items_list)

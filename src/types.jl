@@ -23,6 +23,8 @@ mutable struct MulKnapOptions
     preprocess::Bool
     reductions::Vector
     compute_upper_bound::Function
+    validate_upper_bound::Bool
+    choose_bin::Function
     generate_assignments::Function
     is_undominated::Function
 end

@@ -101,7 +101,7 @@ function remove_infeasible_knapsacks!(bins::Vector{Knapsack}, items::Vector{Item
     return removed_bins
 end
 
-function print_solution(solution::MKP_return)
+function print_solution(solution::MKP_return, is_individual_vals::Bool)
     println("\nObtained solution with profit: ", solution.best_profit)
 
     println("With bins\n", solution.best_assignment)
@@ -111,7 +111,7 @@ function print_solution(solution::MKP_return)
             println(item)
         end
         println("Total capacity filled: ", sum(item -> item.cost, bin.items; init=0))
-        println("Total profit: ", sum(item -> item.valuations[bin.id], bin.items; init=0))
+        println("Total profit: ", sum(item -> item.valuations[is_individual_vals ? bin.id : 1], bin.items; init=0))
     end
 
 end

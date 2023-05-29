@@ -2,17 +2,9 @@
 #=
     The choose_bin function described in "A branch and bound algorithm for hard multiple knapsack problems" - Fukunaga
 =#
-function get_bin_with_least_remaining_capacity(bins::Vector{Knapsack}, items::Vector{Item})
-    smallest_remaining_bin = bins[1]
-    smallest_remaining_capacity = bins[1].capacity
-    for bin in bins
-        remaining_capacity = bin.capacity - sum((item) -> item.cost, bin.items; init=0)
-        if (remaining_capacity < smallest_remaining_capacity)
-            smallest_remaining_bin = bin
-            smallest_remaining_capacity = remaining_capacity
-        end
-    end
-    return smallest_remaining_bin
+function get_bin_with_least_capacity(bins::Vector{Knapsack}, items::Vector{Item})
+    smallest_remaining_bin = findmin((bin) -> bin.capacity, bins)
+    return bins[smallest_remaining_bin[2]]
 end
 #=
     An alternative to get_bin_with_least_remaining_capacity, which instead takes the bin with the most max valuations
@@ -25,6 +17,11 @@ function get_bin_with_most_max_valuations(bins::Vector{Knapsack}, items::Vector{
         scores[max[2]] += 1
     end
     return bins[argmax(scores)]
+end
+
+function get_bin_with_most_capacity(bins::Vector{Knapsack}, items::Vector{Item})
+    largest_remaining_bin = findmax((bin) -> bin.capacity, bins)
+    return bins[largest_remaining_bin[2]]
 end
 
 #=
@@ -103,10 +100,11 @@ end
 
 # solve 0-1 knapsack problem on the aggregate knapsack and return the value
 # Works for items with a single valuation
-function compute_upper_bound(bins::Vector{Knapsack}, items::Vector{Item})
+function compute_surrogate_upper_bound(bins::Vector{Knapsack}, items::Vector{Item})
     aggregate_knapsack = Knapsack(0, [], sum((bin) -> bin.capacity, bins; init=0), 0)
     return solve_binary_knapsack(aggregate_knapsack, items, 1, false)
 end
+
 # the idea:
 # Surrogate sucks cause max of all valuations, but LP-relaxed can respect the valuation of the current agent
 # If every knapsack gets it's most efficient item, with ties broken by 
@@ -330,33 +328,8 @@ function pisinger_r2_reduction_no_sort_individual_valuations(bins::Vector{Knapsa
     return items_to_remove
 end
 
-
-
-# Works for MKP with identical valuations
-# MKP dominance criterion Fukunaga & Korf 2007
-# MAPPED ONE TO ONE :DDDDDDDDDDDDDDDDD TODO
-function is_undominated_identical_vals(path::Vector{Item}, excluded_items::Vector{Item})
-    assignment_cost = sum((item) -> item.cost, path)
-    subsets = combinations(path)
-    for item in excluded_items
-        for subset in subsets
-            subset_cost = sum((item) -> item.cost, subset)
-            subset_profit = sum((item) -> item.valuations[bin.id], subset)
-            # If feasible to swap subset with excluded item
-            if (assignment_cost - subset_cost + item.cost <= bin.capacity)
-                # If profitable to swap subset with excluded item
-                if (item.valuations[bin.id] >= subset_profit)
-                    # Then the assignment is dominated
-                    return false
-                end
-            end
-        end
-    end
-    return true
-end
-
 # Works for individual valuations
-# Jørgen Steig criterion 2023 :)) 
+# Jørgen Steig criterion 2023 :))
 function is_undominated_individual_vals(bin::Knapsack, path::Vector{Item}, remaining_bins::Vector{Knapsack}, excluded_items::Vector{Item})
 
     ids_of_remaining_bins = map((bin) -> bin.id, remaining_bins)
@@ -447,7 +420,9 @@ function generate_all_feasible_maximal_bin_assignments(bin::Knapsack, remaining_
             push!(maximal_assignments, comb)
         end
     end
-    #println(maximal_assignments)
+    if length(maximal_assignments) == 0
+        push!(maximal_assignments, Item[])
+    end
     return maximal_assignments
 end
 
@@ -495,6 +470,9 @@ function generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs(bin::
         if (assignment_is_maximal)
             push!(maximal_assignments, comb)
         end
+    end
+    if length(maximal_assignments) == 0
+        push!(maximal_assignments, Item[])
     end
     #println(maximal_assignments)
     return maximal_assignments
@@ -565,10 +543,10 @@ function no_collect_generate_all_feasible_combinations_bin_assignments(bin::Knap
     return feasible_assignments
 end
 
-global best_profit = 1
+global best_profit = 0
 
-function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, sum_profit::Int, reductions::Vector, compute_upper_bound::Function, validate_upper_bound::Bool, choose_bin::Function, generate_assignments::Function, is_undominated::Function)::MKP_return
-    #println("Subproblem called with\n", bins, "\n", all_items, "\nProfit:", sum_profit)
+function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, is_individual_vals::Bool, sum_profit::Int, reductions::Vector, compute_upper_bound::Function, validate_upper_bound::Bool, choose_bin::Function, generate_assignments::Function, is_undominated::Function)::MKP_return
+    #println("Subproblem called with\n", bins, "\n", all_items, "\nProfit:", sum_profit, "\nBest profit:", best_profit)
     if (length(bins) == 0 || length(all_items) == 0)
         if (sum_profit > best_profit)
             global best_profit = sum_profit
@@ -587,7 +565,7 @@ function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, sum_profit:
     if length(all_reduced_items) > 0
         #println("Reduced items:\n", all_reduced_items, "\n from instance with bins:\n", bins, "\nAnd items: ", all_items)
         #println("Reduced ", length(all_reduced_items), " with ", length(bins), " knapsacks left")
-        return search_MKP(bins, setdiff(all_items, all_reduced_items), sum_profit, reductions, compute_upper_bound, validate_upper_bound, choose_bin, generate_assignments, is_undominated)
+        return search_MKP(bins, setdiff(all_items, all_reduced_items), is_individual_vals, sum_profit, reductions, compute_upper_bound, validate_upper_bound, choose_bin, generate_assignments, is_undominated)
     end
 
     upper_bound = compute_upper_bound(bins, all_items)
@@ -621,12 +599,12 @@ function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, sum_profit:
         #println("Gave knapsack ", bin.id, " the assignment ", assignment)
         #println("Items: ", all_items, "\nItems to remove: ", assignment, "\nRemaining items: ", remaining_items)
         #println("Bin: ", bin, "\n\nBins: ", bins, "\n\nremaining: ", remaining_bins)
-        subproblem = search_MKP(remaining_bins, remaining_items, sum_profit + sum((item) -> item.valuations[bin.id], assignment; init=0), reductions, compute_upper_bound, validate_upper_bound, choose_bin, generate_assignments, is_undominated)
+        subproblem = search_MKP(remaining_bins, remaining_items, is_individual_vals, sum_profit + sum((item) -> item.valuations[is_individual_vals ? bin.id : 1], assignment; init=0), reductions, compute_upper_bound, validate_upper_bound, choose_bin, generate_assignments, is_undominated)
         sum_nodes_explored += subproblem.nodes_explored
         #println("Subproblem:\n", subproblem)
         if (subproblem.best_profit > best_assignment.best_profit)
             best_assignment = MKP_return(subproblem.best_profit, subproblem.best_assignment + copy(bin), 0)
-            #println("Set best assignment to: ", best_assignment)
+            #println("Set best assignment to: ", best_assignment.best_profit)
         end
         bin.items = []
     end
@@ -648,10 +626,10 @@ function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{I
     end
 
     global best_profit = 0
-    solution = search_MKP(bins, items, 0, options.reductions, options.compute_upper_bound, options.validate_upper_bound, options.choose_bin, options.generate_assignments, options.is_undominated)
+    solution = search_MKP(bins, items, options.individual_vals, 0, options.reductions, options.compute_upper_bound, options.validate_upper_bound, options.choose_bin, options.generate_assignments, options.is_undominated)
 
     if (print_solution_after)
-        print_solution(solution)
+        print_solution(solution, options.individual_vals)
     end
     return solution
 end

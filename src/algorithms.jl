@@ -24,6 +24,17 @@ function get_bin_with_most_capacity(bins::Vector{Knapsack}, items::Vector{Item})
     return bins[largest_remaining_bin[2]]
 end
 
+function get_bin_with_smallest_capacity_divided_by_n_max_valuations(bins::Vector{Knapsack}, items::Vector{Item})
+    scores = zeros(length(bins))
+    ids_of_remaining_bins = map((bin) -> bin.id, bins)
+    for item in items
+        max = findmax([item.valuations[i] for i in ids_of_remaining_bins])
+        scores[max[2]] += 1
+    end
+    final = map(bin -> bin[2].capacity / scores[bin[1]], enumerate(bins))
+    return bins[argmin(final)]
+end
+
 #=
     Dynamic programming solution to the 0-1 knapsack problem
     Used to compute the upper bound in MKP
@@ -109,7 +120,100 @@ end
 # Surrogate sucks cause max of all valuations, but LP-relaxed can respect the valuation of the current agent
 # If every knapsack gets it's most efficient item, with ties broken by 
 
-# LP-relaxed 
+#=
+
+
+ERROR: RESULTS DIFFER BETWEEN MODELS:
+
+4-element Vector{Main.FairMulKnap.Knapsack}:
+ Main.FairMulKnap.Knapsack(1, Main.FairMulKnap.Item[], 111, 0)
+ Main.FairMulKnap.Knapsack(2, Main.FairMulKnap.Item[], 60, 0)
+ Main.FairMulKnap.Knapsack(3, Main.FairMulKnap.Item[], 101, 0)
+ Main.FairMulKnap.Knapsack(4, Main.FairMulKnap.Item[], 100, 0)
+12-element Vector{Main.FairMulKnap.Item}:
+ Main.FairMulKnap.Item(1, 19, [20, 13, 20, 2])
+ Main.FairMulKnap.Item(2, 57, [12, 13, 1, 7])
+ Main.FairMulKnap.Item(3, 41, [16, 12, 2, 5])
+ Main.FairMulKnap.Item(4, 20, [13, 18, 10, 11])
+ Main.FairMulKnap.Item(5, 17, [18, 5, 1, 8])
+ Main.FairMulKnap.Item(6, 11, [4, 1, 17, 11])
+ Main.FairMulKnap.Item(7, 21, [12, 20, 20, 17])
+ Main.FairMulKnap.Item(8, 34, [16, 10, 18, 19])
+ Main.FairMulKnap.Item(9, 59, [6, 10, 7, 8])
+ Main.FairMulKnap.Item(10, 48, [4, 10, 9, 11])
+ Main.FairMulKnap.Item(11, 43, [20, 3, 13, 18])
+ Main.FairMulKnap.Item(12, 10, [19, 18, 7, 18])
+
+
+undominated_r2 = BenchmarkResults("R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+Obtained solution with profit: 185
+With bins
+Main.FairMulKnap.Knapsack[Main.FairMulKnap.Knapsack(1, Main.FairMulKnap.Item[Main.FairMulKnap.Item(12, 10, [19, 18, 7, 18]), Main.FairMulKnap.Item(5, 17, [18, 5, 1, 8]), Main.FairMulKnap.Item(11, 43, [20, 3, 13, 18]), Main.FairMulKnap.Item(3, 41, [16, 12, 2, 5])], 111, 0), Main.FairMulKnap.Knapsack(3, Main.FairMulKnap.Item[Main.FairMulKnap.Item(6, 11, [4, 1, 17, 11]), Main.FairMulKnap.Item(1, 19, [20, 13, 20, 2]), Main.FairMulKnap.Item(9, 59, [6, 10, 7, 8])], 101, 0), Main.FairMulKnap.Knapsack(4, Main.FairMulKnap.Item[Main.FairMulKnap.Item(8, 34, [16, 10, 18, 19]), Main.FairMulKnap.Item(10, 48, [4, 10, 9, 11])], 100, 0), Main.FairMulKnap.Knapsack(2, Main.FairMulKnap.Item[Main.FairMulKnap.Item(7, 21, [12, 20, 20, 17]), Main.FairMulKnap.Item(4, 20, [13, 18, 10, 11])], 60, 0)]
+
+Bin 1     Main.FairMulKnap.Knapsack(1, Main.FairMulKnap.Item[Main.FairMulKnap.Item(12, 10, [19, 18, 7, 18]), Main.FairMulKnap.Item(5, 17, [18, 5, 1, 8]), Main.FairMulKnap.Item(11, 43, [20, 3, 13, 18]), Main.FairMulKnap.Item(3, 41, [16, 12, 2, 5])], 111, 0)
+Main.FairMulKnap.Item(12, 10, [19, 18, 7, 18])
+Main.FairMulKnap.Item(5, 17, [18, 5, 1, 8])
+Main.FairMulKnap.Item(11, 43, [20, 3, 13, 18])
+Main.FairMulKnap.Item(3, 41, [16, 12, 2, 5])
+Total capacity filled: 111
+Total profit: 73
+
+Bin 3     Main.FairMulKnap.Knapsack(3, Main.FairMulKnap.Item[Main.FairMulKnap.Item(6, 11, [4, 1, 17, 11]), Main.FairMulKnap.Item(1, 19, [20, 13, 20, 2]), Main.FairMulKnap.Item(9, 59, [6, 10, 7, 8])], 101, 0)
+Main.FairMulKnap.Item(6, 11, [4, 1, 17, 11])
+Main.FairMulKnap.Item(1, 19, [20, 13, 20, 2])
+Main.FairMulKnap.Item(9, 59, [6, 10, 7, 8])
+Total capacity filled: 89
+Total profit: 44
+
+Bin 4     Main.FairMulKnap.Knapsack(4, Main.FairMulKnap.Item[Main.FairMulKnap.Item(8, 34, [16, 10, 18, 19]), Main.FairMulKnap.Item(10, 48, [4, 10, 9, 11])], 100, 0)
+Main.FairMulKnap.Item(8, 34, [16, 10, 18, 19])
+Main.FairMulKnap.Item(10, 48, [4, 10, 9, 11])
+Total capacity filled: 82
+Total profit: 30
+
+Bin 2     Main.FairMulKnap.Knapsack(2, Main.FairMulKnap.Item[Main.FairMulKnap.Item(7, 21, [12, 20, 20, 17]), Main.FairMulKnap.Item(4, 20, [13, 18, 10, 11])], 60, 0)
+Main.FairMulKnap.Item(7, 21, [12, 20, 20, 17])
+Main.FairMulKnap.Item(4, 20, [13, 18, 10, 11])
+Total capacity filled: 41
+Total profit: 38
+
+
+undominated_lp_bound = BenchmarkResults("LP-relaxed", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], lp_relaxed_upper_bound, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+Obtained solution with profit: 184
+With bins
+Main.FairMulKnap.Knapsack[Main.FairMulKnap.Knapsack(1, Main.FairMulKnap.Item[Main.FairMulKnap.Item(5, 17, [18, 5, 1, 8]), Main.FairMulKnap.Item(11, 43, [20, 3, 13, 18]), Main.FairMulKnap.Item(3, 41, [16, 12, 2, 5])], 111, 0), Main.FairMulKnap.Knapsack(3, Main.FairMulKnap.Item[Main.FairMulKnap.Item(6, 11, [4, 1, 17, 11]), Main.FairMulKnap.Item(1, 19, [20, 13, 20, 2]), Main.FairMulKnap.Item(9, 59, [6, 10, 7, 8])], 101, 0), Main.FairMulKnap.Knapsack(4, Main.FairMulKnap.Item[Main.FairMulKnap.Item(12, 10, [19, 18, 7, 18]), Main.FairMulKnap.Item(8, 34, [16, 10, 18, 19]), Main.FairMulKnap.Item(10, 48, [4, 10, 9, 11])], 100, 0), Main.FairMulKnap.Knapsack(2, Main.FairMulKnap.Item[Main.FairMulKnap.Item(7, 21, [12, 20, 20, 17]), Main.FairMulKnap.Item(4, 20, [13, 18, 10, 11])], 60, 0)]
+
+Bin 1     Main.FairMulKnap.Knapsack(1, Main.FairMulKnap.Item[Main.FairMulKnap.Item(5, 17, [18, 5, 1, 8]), Main.FairMulKnap.Item(11, 43, [20, 3, 13, 18]), Main.FairMulKnap.Item(3, 41, [16, 12, 2, 5])], 111, 0)
+Main.FairMulKnap.Item(5, 17, [18, 5, 1, 8])
+Main.FairMulKnap.Item(11, 43, [20, 3, 13, 18])
+Main.FairMulKnap.Item(3, 41, [16, 12, 2, 5])
+Total capacity filled: 101
+Total profit: 54
+
+Bin 3     Main.FairMulKnap.Knapsack(3, Main.FairMulKnap.Item[Main.FairMulKnap.Item(6, 11, [4, 1, 17, 11]), Main.FairMulKnap.Item(1, 19, [20, 13, 20, 2]), Main.FairMulKnap.Item(9, 59, [6, 10, 7, 8])], 101, 0)
+Main.FairMulKnap.Item(6, 11, [4, 1, 17, 11])
+Main.FairMulKnap.Item(1, 19, [20, 13, 20, 2])
+Main.FairMulKnap.Item(9, 59, [6, 10, 7, 8])
+Total capacity filled: 89
+Total profit: 44
+
+Bin 4     Main.FairMulKnap.Knapsack(4, Main.FairMulKnap.Item[Main.FairMulKnap.Item(12, 10, [19, 18, 7, 18]), Main.FairMulKnap.Item(8, 34, [16, 10, 18, 19]), Main.FairMulKnap.Item(10, 48, [4, 10, 9, 11])], 100, 0)
+Main.FairMulKnap.Item(12, 10, [19, 18, 7, 18])
+Main.FairMulKnap.Item(8, 34, [16, 10, 18, 19])
+Main.FairMulKnap.Item(10, 48, [4, 10, 9, 11])
+Total capacity filled: 92
+Total profit: 48
+
+Bin 2     Main.FairMulKnap.Knapsack(2, Main.FairMulKnap.Item[Main.FairMulKnap.Item(7, 21, [12, 20, 20, 17]), Main.FairMulKnap.Item(4, 20, [13, 18, 10, 11])], 60, 0)
+Main.FairMulKnap.Item(7, 21, [12, 20, 20, 17])
+Main.FairMulKnap.Item(4, 20, [13, 18, 10, 11])
+Total capacity filled: 41
+Total profit: 38
+
+
+ERROR: RESULTS DIFFER BETWEEN MODELS:
+=#
+# LP-relaxed - THIS DOES NOT WORK, SEE ABOVE EXAMPLE
 function lp_relaxed_upper_bound(bins::Vector{Knapsack}, items::Vector{Item})
     remaining_bins = deepcopy(bins)
     filled_bins = []
@@ -545,7 +649,7 @@ end
 
 global best_profit = 0
 
-function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, is_individual_vals::Bool, sum_profit::Int, reductions::Vector, compute_upper_bound::Function, validate_upper_bound::Bool, choose_bin::Function, generate_assignments::Function, is_undominated::Function)::MKP_return
+function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, is_individual_vals::Bool, sum_profit::Int, reductions::Vector, compute_upper_bound::Function, validate_upper_bound::Bool, choose_bin::Function, value_ordering_heuristic::Function, reverse_value_ordering_heuristic::Bool, generate_assignments::Function, is_undominated::Function)::MKP_return
     #println("Subproblem called with\n", bins, "\n", all_items, "\nProfit:", sum_profit, "\nBest profit:", best_profit)
     if (length(bins) == 0 || length(all_items) == 0)
         if (sum_profit > best_profit)
@@ -565,7 +669,7 @@ function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, is_individu
     if length(all_reduced_items) > 0
         #println("Reduced items:\n", all_reduced_items, "\n from instance with bins:\n", bins, "\nAnd items: ", all_items)
         #println("Reduced ", length(all_reduced_items), " with ", length(bins), " knapsacks left")
-        return search_MKP(bins, setdiff(all_items, all_reduced_items), is_individual_vals, sum_profit, reductions, compute_upper_bound, validate_upper_bound, choose_bin, generate_assignments, is_undominated)
+        return search_MKP(bins, setdiff(all_items, all_reduced_items), is_individual_vals, sum_profit, reductions, compute_upper_bound, validate_upper_bound, choose_bin, value_ordering_heuristic, reverse_value_ordering_heuristic, generate_assignments, is_undominated)
     end
 
     upper_bound = compute_upper_bound(bins, all_items)
@@ -588,7 +692,7 @@ function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, is_individu
     #println("Selected ", bin, " and got bound ", upper_bound)
     # We evaluated 11 different value ordering heuristics and found that the best performing heuristic overall was the min-cardinality-max-profit ordering, where candidate bin assignments are sorted in order of non-decreasing cardinality and ties are broken according to non-increasing order of profit
     remaining_bins = setdiff(bins, [bin])
-    assignments = sort(generate_assignments(bin, remaining_bins, all_items, is_undominated), rev=true)
+    assignments = sort(generate_assignments(bin, remaining_bins, all_items, is_undominated), lt=(a, b) -> value_ordering_heuristic(a, b), rev=reverse_value_ordering_heuristic)
     best_assignment = MKP_return(-1, [], 0)
     #println("Assignments:")
     #display(assignments)
@@ -599,7 +703,7 @@ function search_MKP(bins::Vector{Knapsack}, all_items::Vector{Item}, is_individu
         #println("Gave knapsack ", bin.id, " the assignment ", assignment)
         #println("Items: ", all_items, "\nItems to remove: ", assignment, "\nRemaining items: ", remaining_items)
         #println("Bin: ", bin, "\n\nBins: ", bins, "\n\nremaining: ", remaining_bins)
-        subproblem = search_MKP(remaining_bins, remaining_items, is_individual_vals, sum_profit + sum((item) -> item.valuations[is_individual_vals ? bin.id : 1], assignment; init=0), reductions, compute_upper_bound, validate_upper_bound, choose_bin, generate_assignments, is_undominated)
+        subproblem = search_MKP(remaining_bins, remaining_items, is_individual_vals, sum_profit + sum((item) -> item.valuations[is_individual_vals ? bin.id : 1], assignment; init=0), reductions, compute_upper_bound, validate_upper_bound, choose_bin, value_ordering_heuristic, reverse_value_ordering_heuristic, generate_assignments, is_undominated)
         sum_nodes_explored += subproblem.nodes_explored
         #println("Subproblem:\n", subproblem)
         if (subproblem.best_profit > best_assignment.best_profit)
@@ -626,7 +730,7 @@ function solve_multiple_knapsack_problem(bins::Vector{Knapsack}, items::Vector{I
     end
 
     global best_profit = 0
-    solution = search_MKP(bins, items, options.individual_vals, 0, options.reductions, options.compute_upper_bound, options.validate_upper_bound, options.choose_bin, options.generate_assignments, options.is_undominated)
+    solution = search_MKP(bins, items, options.individual_vals, 0, options.reductions, options.compute_upper_bound, options.validate_upper_bound, options.choose_bin, options.value_ordering_heuristic, options.reverse_value_ordering_heuristic, options.generate_assignments, options.is_undominated)
 
     if (print_solution_after)
         print_solution(solution, options.individual_vals)

@@ -124,3 +124,7 @@ function duplicate_vals(array, duplicates)
     end
     return new_arr'
 end
+
+function always_undominated_fun(bin::Knapsack, path::Vector{Item}, remaining_bins::Vector{Knapsack}, excluded_items::Vector{Item})
+    return true
+end

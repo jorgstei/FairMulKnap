@@ -18,6 +18,13 @@ mutable struct MKP_return
     nodes_explored::Int
 end
 
+mutable struct CBC_return
+    m::JuMP.Model
+    best_profit::Int
+    best_assignment::Matrix{Float64}
+    nodes_explored::Int
+end
+
 mutable struct MulKnapOptions
     individual_vals::Bool
     preprocess::Bool
@@ -25,6 +32,8 @@ mutable struct MulKnapOptions
     compute_upper_bound::Function
     validate_upper_bound::Bool
     choose_bin::Function
+    value_ordering_heuristic::Function
+    reverse_value_ordering_heuristic::Bool
     generate_assignments::Function
     is_undominated::Function
 end
@@ -35,13 +44,30 @@ function add_knapsack_to_vector_and_return_new_vector(knapsacks::Vector{Knapsack
     return my_copy
 end
 
-function is_smaller_cardinally_with_value_tie_break(items_a::Vector{Item}, items_b::Vector{Item})
+function is_smaller_cardinally_with_objective_value_tie_break(items_a::Vector{Item}, items_b::Vector{Item})
     if (length(items_a) == length(items_b))
-        return sum((item) -> maximum(item.valuations), items_a) < sum((item) -> maximum(item.valuations), items_b)
+        return sum((item) -> item.valuations[1], items_a) < sum((item) -> item.valuations[1], items_b)
     else
         return length(items_a) < length(items_b)
     end
 end
+
+function is_smaller_cardinally_with_value_tie_break(items_a::Vector{Item}, items_b::Vector{Item})
+    if (length(items_a) == length(items_b))
+        return sum((item) -> maximum(item.valuations), items_a; init=0) > sum((item) -> maximum(item.valuations), items_b; init=0)
+    else
+        return length(items_a) < length(items_b)
+    end
+end
+
+function is_smaller_by_weight(items_a::Vector{Item}, items_b::Vector{Item})
+    return sum((item) -> item.cost, items_a; init=0) < sum((item) -> item.cost, items_b; init=0)
+end
+
+function is_smaller_by_max_value(items_a::Vector{Item}, items_b::Vector{Item})
+    return sum((item) -> maximum(item.valuations), items_a; init=0) < sum((item) -> maximum(item.valuations), items_b; init=0)
+end
+
 
 import Base: ==
 ==(x::Knapsack, y::Knapsack) = x.id == y.id

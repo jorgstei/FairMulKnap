@@ -111,38 +111,62 @@ n_items_list = collect(range(1, 1, step=item_list_step))
 # How many knapsacks should be generated tested, (from, to)
 n_agents_tuple = (1, 1)
 =#
-n_items_list = collect(range(14, 18, step=item_list_step))
-n_agents_tuple = (2, 8)
+n_items_list = collect(range(60, 60, step=item_list_step))
+n_agents_tuple = (10, 10)
 
 function init_items_x_agents_matrix()
     return zeros((length(n_items_list), n_agents_tuple[2] - n_agents_tuple[1] + 1))
 end
 #display(items_x_agents[1, :])
 agent_range = range(n_agents_tuple[1], n_agents_tuple[2])
+# Objective valuations
+identical = BenchmarkResults("MKP Maximal", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, true, [], compute_surrogate_upper_bound, false, get_bin_with_least_capacity, is_smaller_cardinally_with_objective_value_tie_break, false, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
+nonmaximal = BenchmarkResults("MKP Nonmaximal", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, true, [], compute_surrogate_upper_bound, false, get_bin_with_least_capacity, is_smaller_cardinally_with_objective_value_tie_break, false, generate_all_feasible_bin_assignments_using_up_to_k_combs, () -> ()))
+r2 = BenchmarkResults("MKP + R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, true, [pisinger_r2_reduction], compute_surrogate_upper_bound, false, get_bin_with_least_capacity, is_smaller_cardinally_with_objective_value_tie_break, false, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
 
-identical = BenchmarkResults("MKP", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, true, [], compute_surrogate_upper_bound, false, get_bin_with_least_capacity, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
-r2 = BenchmarkResults("MKP + R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, true, [pisinger_r2_reduction], compute_surrogate_upper_bound, false, get_bin_with_least_capacity, generate_all_feasible_maximal_bin_assignments_using_up_to_k_combs, () -> ()))
+# Subjective valuations
+all_combs = BenchmarkResults("All combinations", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_all_feasible_combinations_bin_assignments, () -> ()))
+up_to_k = BenchmarkResults("Up-to-k", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_all_feasible_bin_assignments_using_up_to_k_combs, () -> ()))
 
-all_combs = BenchmarkResults("All combinations", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, generate_all_feasible_combinations_bin_assignments, () -> ()))
-up_to_k = BenchmarkResults("Up-to-k", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, generate_all_feasible_bin_assignments_using_up_to_k_combs, () -> ()))
-function always_undominated_fun(bin::Knapsack, path::Vector{Item}, remaining_bins::Vector{Knapsack}, excluded_items::Vector{Item})
-    return true
-end
-always_undominated = BenchmarkResults("Always undominated", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, generate_undominated_bin_assignments, always_undominated_fun))
-undominated = BenchmarkResults("Undominated", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_r2 = BenchmarkResults("Undominated+R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_r2_no_sort = BenchmarkResults("Undominated+R2nosort", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_no_sort_individual_valuations], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_lp_bound = BenchmarkResults("Undominated+LP", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], lp_relaxed_upper_bound, false, get_bin_with_least_capacity, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_bb_r2 = BenchmarkResults("BB + Undom + R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, generate_undominated_bin_assignments, is_undominated_individual_vals))
+always_undominated = BenchmarkResults("Always undominated", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, always_undominated_fun))
+undominated = BenchmarkResults("Normal", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_r2 = BenchmarkResults("R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_r2_no_sort = BenchmarkResults("R2 nosort", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_no_sort_individual_valuations], compute_max_upper_bound_individual_vals, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+#undominated_lp_bound = BenchmarkResults("LP-relaxed", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], lp_relaxed_upper_bound, false, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_bb_r2 = BenchmarkResults("BB + Undom + R2", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
 
-undominated_bb_r2_min_capacity_ordering = BenchmarkResults("Smallest capacity", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_bb_r2_max_val_ordering = BenchmarkResults("Max val ordering", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_most_max_valuations, generate_undominated_bin_assignments, is_undominated_individual_vals))
-undominated_bb_r2_max_capacity_ordering = BenchmarkResults("Largest capacity", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_most_capacity, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_bb_r2_min_capacity_ordering = BenchmarkResults("Smallest capacity", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_bb_r2_max_val_ordering = BenchmarkResults("Max val ordering", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_most_max_valuations, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_bb_r2_max_val_and_least_capacity_ordering = BenchmarkResults("Smallest c/n_max_vals", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_smallest_capacity_divided_by_n_max_valuations, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+undominated_bb_r2_max_capacity_ordering = BenchmarkResults("Largest capacity", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_most_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+
+# Value ordering heuristics
+min_cardinality = BenchmarkResults("Min Cardinality", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+max_cardinality = BenchmarkResults("Max Cardinality", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, true, generate_undominated_bin_assignments, is_undominated_individual_vals))
+min_weight = BenchmarkResults("Min Weight", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_by_weight, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+max_weight = BenchmarkResults("Max Weight", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_by_weight, true, generate_undominated_bin_assignments, is_undominated_individual_vals))
+min_profit = BenchmarkResults("Min Profit", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_by_max_value, false, generate_undominated_bin_assignments, is_undominated_individual_vals))
+max_profit = BenchmarkResults("Max Profit", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_by_max_value, true, generate_undominated_bin_assignments, is_undominated_individual_vals))
+
+best_i_got = BenchmarkResults("MOKP", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(true, true, [pisinger_r2_reduction_individual_valuations], compute_max_upper_bound_individual_vals, true, get_bin_with_least_capacity, is_smaller_cardinally_with_value_tie_break, true, generate_undominated_bin_assignments, is_undominated_individual_vals))
 
 
-cbc_res = BenchmarkResults("CBC", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, false, [], () -> (), false, () -> (), () -> (), () -> ()))
-#undominated_bb_r2_min_capacity_ordering, undominated_bb_r2_max_val_ordering, undominated_bb_r2_max_capacity_ordering
-test_cases::Vector{BenchmarkResults} = [up_to_k, undominated, always_undominated]
+cbc_res = BenchmarkResults("CBC", init_items_x_agents_matrix(), init_items_x_agents_matrix(), agent_range, n_items_list, MulKnapOptions(false, false, [], () -> (), false, () -> (), () -> (), false, () -> (), () -> ()))
+#
+test_cases::Vector{BenchmarkResults} = [cbc_res]
+
+#=
+el_bins = [
+    Knapsack(1, Item[], 10, 0),
+    Knapsack(2, Item[], 10, 0)
+]
+el_items = [
+    Item(1, 5, [6, 1]),
+    Item(2, 5, [1, 6]),
+    Item(3, 9, [2, 2])
+]
+=#
+
 #=
 el_bins = [
     Knapsack(1, Item[], 44, 0),
@@ -246,24 +270,25 @@ for (item_index, n_items) in enumerate(n_items_list)
         results = []
         for test_case in test_cases
             if test_case.solve_method == "CBC"
-                #=
-                values = []
+                values = zeros(Int8, n_agents, n_items)
                 weights = []
                 capacities = []
-                for item in bench_items
-                    push!(values, item.valuations[1])
+                for (j, item) in enumerate(bench_items)
                     push!(weights, item.cost)
+                    values[:, j] = item.valuations
                 end
                 for bin in bench_bins
                     push!(capacities, bin.capacity)
                 end
-                values = duplicate_vals(values, n_agents)
                 weights = duplicate_vals(weights, n_agents)
                 println("\n\nCBC")
+                res = linear_model_solver(values, weights, capacities, n_agents, n_items)
                 cbc_bench = @benchmark linear_model_solver($values, $weights, $capacities, $n_agents, $n_items)
-                show(stdout, MIME("text/plain"), cbc_bench)
-                =#
-                break
+                println(res.nodes_explored, " nodes explored in ", mean(cbc_bench.times) / 1e6, " ms")
+                #show(stdout, MIME("text/plain"), cbc_bench)
+                test_case.mean_values[item_index, n_agents-n_agents_tuple[1]+1] = mean(cbc_bench.times)
+                test_case.nodes_explored[item_index, n_agents-n_agents_tuple[1]+1] = res.nodes_explored
+                push!(results, res)
             else
                 println("\n", test_case.solve_method)
                 result = solve_multiple_knapsack_problem(deepcopy(bench_bins), deepcopy(bench_items), test_case.options, false)

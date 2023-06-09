@@ -1,2 +1,4 @@
 # FairMulKnap
-Master
+Masters project 2023.
+
+Feel free to use any and all parts of this code however you would like.
